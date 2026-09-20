@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>无人机配药 · DroneDose</title>
+<meta name="theme-color" content="#0E2233">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{
+  --ink:#0E2233;
+  --ink-2:#2B4356;
+  --paper:#EEF1F4;
+  --card:#FFFFFF;
+  --line:#C3CED8;
+  --line-strong:#8FA3B3;
+  --blue:#12527A;
+  --blue-soft:#DCE9F2;
+  --amber:#B06E00;
+  --amber-soft:#FFF0D2;
+  --red:#A11221;
+  --red-soft:#FBE0E3;
+  --green:#12603C;
+  --green-soft:#DDEFE4;
+  --base:17px;
+  --radius:4px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:var(--base);
+  font-weight:500;
+  line-height:1.5;
+  font-variant-numeric:tabular-nums;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap{max-width:560px;margin:0 auto;padding:0 14px 80px}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:40;
+  background:var(--ink);color:#fff;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;
+  display:flex;align-items:center;gap:10px;
+}
+.hgroup{flex:1;min-width:0}
+.htitle{font-size:1.18em;font-weight:700;letter-spacing:.01em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hsub{font-size:.76em;font-weight:500;color:#A9C2D4;line-height:1.3;margin-top:2px}
+.hbtn{
+  flex:0 0 auto;min-width:48px;height:42px;
+  background:transparent;color:#fff;
+  border:2px solid #4E6B80;border-radius:var(--radius);
+  font-size:.92em;font-weight:700;font-family:inherit;
+  cursor:pointer;
+}
+.hbtn:active{background:#20394B}
+
+/* ---------- blocks ---------- */
+section{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  margin-top:14px;
+  overflow:hidden;
+}
+.sec-head{
+  padding:12px 14px 10px;
+  border-bottom:1px solid var(--line);
+  background:#F7F9FB;
+}
+.sec-title{font-size:1.02em;font-weight:700;margin:0}
+.sec-note{font-size:.82em;font-weight:500;color:var(--ink-2);margin:3px 0 0}
+.sec-body{padding:14px}
+
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+label.lab{display:block;font-size:.94em;font-weight:700;margin-bottom:7px}
+.hint{font-size:.82em;font-weight:500;color:var(--ink-2);margin-top:6px;line-height:1.4}
+
+/* ---------- controls ---------- */
+input[type=number],input[type=text]{
+  width:100%;
+  font-family:inherit;font-size:1.06em;font-weight:600;
+  color:var(--ink);background:#fff;
+  border:2px solid var(--line-strong);border-radius:var(--radius);
+  padding:11px 12px;
+  font-variant-numeric:tabular-nums;
+}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input:focus{outline:3px solid var(--blue);outline-offset:1px;border-color:var(--blue)}
+input.bad{border-color:var(--red);background:var(--red-soft)}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font-family:inherit;font-size:.94em;font-weight:600;
+  padding:10px 12px;min-height:44px;
+  background:#fff;color:var(--ink);
+  border:2px solid var(--line-strong);border-radius:var(--radius);
+  cursor:pointer;flex:0 0 auto;
+}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.chips.grow .chip{flex:1 1 0;min-width:74px;text-align:center}
+
+.row{display:flex;gap:8px;align-items:stretch}
+.row > .grow{flex:1 1 auto;min-width:0}
+.suffix{
+  display:flex;align-items:center;padding:0 12px;
+  border:2px solid var(--line-strong);border-left:none;
+  border-radius:0 var(--radius) var(--radius) 0;
+  background:#F2F5F8;font-weight:700;font-size:.96em;white-space:nowrap;
+}
+.row.joined input{border-radius:var(--radius) 0 0 var(--radius)}
+
+/* ---------- product cards ---------- */
+.prod{
+  border:2px solid var(--line);border-radius:var(--radius);
+  padding:12px;margin-bottom:12px;background:#FBFCFD;
+}
+.prod-top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.prod-top .grow{flex:1}
+.icon-btn{
+  flex:0 0 auto;width:44px;height:44px;
+  border:2px solid var(--line-strong);border-radius:var(--radius);
+  background:#fff;color:var(--red);font-size:1.2em;font-weight:700;
+  font-family:inherit;cursor:pointer;line-height:1;
+}
+.btn{
+  display:block;width:100%;
+  font-family:inherit;font-size:1em;font-weight:700;
+  padding:13px;min-height:48px;
+  border-radius:var(--radius);cursor:pointer;
+  border:2px solid var(--ink);background:#fff;color:var(--ink);
+}
+.btn.solid{background:var(--ink);color:#fff}
+.btn:active{transform:translateY(1px)}
+
+/* ---------- results ---------- */
+.result{background:var(--ink);color:#fff;border-color:var(--ink)}
+.result .sec-head{background:#16314A;border-bottom-color:#2E4D66}
+.result .sec-note{color:#A9C2D4}
+
+.headline{font-size:1.9em;font-weight:700;line-height:1.15;letter-spacing:-.01em}
+.headline .u{font-size:.5em;font-weight:600;color:#A9C2D4}
+
+.tanks{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 4px}
+.tank{
+  width:36px;height:50px;
+  border:2px solid #6E8AA0;border-radius:3px;
+  position:relative;overflow:hidden;background:#16314A;
+}
+.tank i{position:absolute;left:0;right:0;bottom:0;background:#5FD0A0;display:block}
+.tank b{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:.7em;font-weight:700;color:#06202F;font-style:normal;
+}
+.tank.part i{background:#F2C14E}
+
+.load{
+  border-top:1px solid #2E4D66;
+  padding:12px 0;
+}
+.load:first-of-type{border-top:none}
+.load-h{font-size:.92em;font-weight:700;color:#A9C2D4;margin-bottom:6px}
+.line{display:flex;justify-content:space-between;gap:12px;padding:4px 0;font-size:1.02em}
+.line .k{font-weight:600}
+.line .v{font-weight:700;white-space:nowrap}
+.line.water .v{color:#8FD6F5}
+.line.chem .v{color:#7BE3B0}
+
+.totals{border-top:2px solid #2E4D66;margin-top:4px;padding-top:12px}
+
+/* ---------- notices ---------- */
+.note{
+  border:2px solid;border-radius:var(--radius);
+  padding:12px;margin-top:12px;font-size:.95em;font-weight:600;line-height:1.45;
+}
+.note.amber{background:var(--amber-soft);border-color:var(--amber);color:#4A2E00}
+.note.red{background:var(--red-soft);border-color:var(--red);color:#5C0A14}
+.note.blue{background:var(--blue-soft);border-color:var(--blue);color:#0A2E45}
+.note.green{background:var(--green-soft);border-color:var(--green);color:#0A3A24}
+.note b{font-weight:800}
+.mult{font-size:1.5em;font-weight:800;display:block;margin-bottom:2px}
+
+/* ---------- disclosure ---------- */
+details{border-top:1px solid var(--line)}
+details:first-of-type{border-top:none}
+summary{
+  padding:14px;font-weight:700;font-size:.98em;cursor:pointer;
+  list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;
+}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:1.3em;font-weight:700;color:var(--blue)}
+details[open] summary::after{content:"–"}
+.det-body{padding:0 14px 16px;font-size:.95em;font-weight:500;line-height:1.55}
+.det-body p{margin:0 0 10px}
+.det-body p:last-child{margin-bottom:0}
+
+table{width:100%;border-collapse:collapse;font-size:.95em}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{font-weight:700;background:#F2F5F8}
+td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ---------- language gate ---------- */
+#gate{
+  position:fixed;inset:0;z-index:100;
+  background:var(--ink);color:#fff;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:24px;gap:14px;
+}
+#gate h1{font-size:1.5em;margin:0 0 4px;font-weight:700}
+#gate p{margin:0 0 18px;color:#A9C2D4;font-size:1em;font-weight:500}
+#gate button{
+  width:100%;padding:18px;font-size:1.15em;font-weight:700;
+  font-family:inherit;background:#fff;color:var(--ink);
+  border:none;border-radius:var(--radius);cursor:pointer;text-align:left;
+}
+#gate button span{display:block;font-size:.72em;font-weight:600;color:var(--ink-2);margin-top:2px}
+.hidden{display:none !important}
+
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <h1>无人机配药 · DroneDose</h1>
+  <p>请选择语言 / Choose language / Pilih bahasa</p>
+  <button data-setlang="zh">中文<span>农用无人机药量计算</span></button>
+  <button data-setlang="en">English<span>Agricultural drone dosage calculator</span></button>
+  <button data-setlang="ms">Malay<span>Pengira dos racun dron pertanian</span></button>
+</div>
+
+<header>
+  <div class="hgroup">
+    <div class="htitle" id="appTitle">无人机配药</div>
+    <div class="hsub" id="appSub">以 DJI 机型为基准</div>
+  </div>
+  <button class="hbtn" id="langBtn" aria-label="language">中文</button>
+  <button class="hbtn" id="sizeBtn" aria-label="text size">Aa</button>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ INPUTS ============ -->
+  <section>
+    <div class="sec-head">
+      <h2 class="sec-title" data-t="secInputs">喷药设定</h2>
+      <p class="sec-note" data-t="secInputsNote">计算所需的全部输入都在这里</p>
+    </div>
+    <div class="sec-body">
+
+      <div class="field">
+        <label class="lab" data-t="labDrone">无人机机型</label>
+        <div class="chips" id="modelChips"></div>
+      </div>
+
+      <div class="field">
+        <label class="lab" for="tank" data-t="labTank">药箱容量</label>
+        <div class="row joined">
+          <input class="grow" type="number" id="tank" inputmode="decimal" min="0" step="0.5" value="40">
+          <div class="suffix">L</div>
+        </div>
+        <p class="hint" data-t="hintTank">以你实际装的量为准，不必装满。</p>
+      </div>
+
+      <div class="field">
+        <label class="lab" data-t="labAreaUnit">面积按什么算</label>
+        <div class="chips grow" id="areaUnitChips"></div>
+      </div>
+
+      <div class="field">
+        <label class="lab" for="area" id="areaLab" data-t="labArea">喷药面积</label>
+        <div class="row joined">
+          <input class="grow" type="number" id="area" inputmode="decimal" min="0" step="0.1" value="5">
+          <div class="suffix" id="areaSuffix">英亩</div>
+        </div>
+      </div>
+
+      <div class="field hidden" id="densityField">
+        <label class="lab" for="density" data-t="labDensity">每英亩树数</label>
+        <div class="row joined">
+          <input class="grow" type="number" id="density" inputmode="decimal" min="1" step="1" value="40">
+          <div class="suffix" data-t="unTreesAc">棵/英亩</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="lab" for="rate" data-t="labRate">无人机每英亩喷液量</label>
+        <div class="chips" id="rateChips"></div>
+        <div class="row joined" style="margin-top:6px">
+          <input class="grow" type="number" id="rate" inputmode="decimal" min="0" step="0.5" value="20">
+          <div class="suffix">L / <span data-t="unAcre">英亩</span></div>
+        </div>
+        <p class="hint" data-t="hintRate">这是软件最重要的数字。按钮只是常见起点，请用下方的校准工具量出你自己的实际值。</p>
+      </div>
+
+      <div class="field">
+        <label class="lab" for="conv" data-t="labConv">常规喷雾用水量（过山泵／背包桶）</label>
+        <div class="row joined">
+          <input class="grow" type="number" id="conv" inputmode="decimal" min="0" step="10" value="800">
+          <div class="suffix">L / <span data-t="unAcre">英亩</span></div>
+        </div>
+        <p class="hint" data-t="hintConv">只有当药剂按「标签每桶」或「稀释比例」输入时才会用到，用来换算成每英亩用量。例：40 棵 × 每棵 20 L = 800 L／英亩。</p>
+      </div>
+
+      <div class="field">
+        <label class="lab" data-t="labSplit">分箱方式</label>
+        <div class="chips grow" id="splitChips"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ PRODUCTS ============ -->
+  <section>
+    <div class="sec-head">
+      <h2 class="sec-title" data-t="secProducts">药剂</h2>
+      <p class="sec-note" data-t="secProductsNote">一次最多 4 种。混配前请先确认药剂之间可以混用。</p>
+    </div>
+    <div class="sec-body">
+      <div id="prodList"></div>
+      <button class="btn" id="addProd" data-t="btnAdd">+ 添加药剂</button>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section class="result" id="resultSec">
+    <div class="sec-head">
+      <h2 class="sec-title" data-t="secResult">配药单</h2>
+      <p class="sec-note" data-t="secResultNote">按这个装每一箱</p>
+    </div>
+    <div class="sec-body" id="resultBody"></div>
+  </section>
+
+  <button class="btn solid" id="copyBtn" style="margin-top:14px" data-t="btnCopy">复制配药单</button>
+
+  <!-- ============ REFERENCE ============ -->
+  <section>
+    <details>
+      <summary data-t="detCal">校准：量出你自己的每英亩喷液量</summary>
+      <div class="det-body">
+        <p data-t="calIntro">装一箱水，正常作业飞完，记录这一箱喷完覆盖了多大面积。</p>
+        <div class="field">
+          <label class="lab" for="calL" data-t="calL">这一箱装了多少水</label>
+          <div class="row joined">
+            <input class="grow" type="number" id="calL" inputmode="decimal" min="0" step="0.5" placeholder="40">
+            <div class="suffix">L</div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lab" for="calA" data-t="calA">喷完覆盖的面积</label>
+          <div class="row joined">
+            <input class="grow" type="number" id="calA" inputmode="decimal" min="0" step="0.1" placeholder="2">
+            <div class="suffix" data-t="unAcre">英亩</div>
+          </div>
+        </div>
+        <div id="calOut"></div>
+        <button class="btn" id="calUse" data-t="calUse">用这个数值</button>
+      </div>
+    </details>
+
+    <details>
+      <summary data-t="detWhy">为什么不能照搬桶装浓度</summary>
+      <div class="det-body" id="whyBody"></div>
+    </details>
+
+    <details>
+      <summary data-t="detTable">DJI 机型药箱容量</summary>
+      <div class="det-body">
+        <table id="modelTable"></table>
+        <p class="hint" id="tableNote" style="margin-top:10px"></p>
+      </div>
+    </details>
+
+    <details>
+      <summary data-t="detMath">计算方法</summary>
+      <div class="det-body" id="mathBody"></div>
+    </details>
+
+    <details>
+      <summary data-t="detReset">重设</summary>
+      <div class="det-body">
+        <button class="btn" id="resetBtn" data-t="btnReset">清空全部输入</button>
+      </div>
+    </details>
+  </section>
+
+</div>
+
+<script>
+"use strict";
+
+/* ===================== model data ===================== */
+/* Spray tank capacity (litres). Verified against DJI product pages and
+   published specifications, September 2026. Spreading-hopper volumes are
+   deliberately excluded — this app only doses liquid. */
+var MODELS = [
+  {id:"T10",  tank:8},
+  {id:"T16",  tank:16},
+  {id:"T20",  tank:20},
+  {id:"T20P", tank:20},
+  {id:"T25",  tank:20},
+  {id:"T25P", tank:20},
+  {id:"T30",  tank:30},
+  {id:"T40",  tank:40},
+  {id:"T50",  tank:40},
+  {id:"T55",  tank:50},
+  {id:"T70P", tank:70},
+  {id:"T100", tank:100}
+];
+
+/* ===================== i18n ===================== */
+var I18N = {
+zh:{
+  code:"中文", title:"无人机配药", sub:"以 DJI 机型为基准",
+  secInputs:"喷药设定", secInputsNote:"计算所需的全部输入都在这里",
+  labDrone:"无人机机型", custom:"自定",
+  labTank:"药箱容量", hintTank:"以你实际装的量为准，不必装满。",
+  labAreaUnit:"面积按什么算", uAc:"英亩", uHa:"公顷", uTree:"棵树",
+  labArea:"喷药面积", labAreaTree:"喷药树数",
+  labDensity:"每英亩树数", unTreesAc:"棵/英亩", unAcre:"英亩", unTree:"棵",
+  labRate:"无人机每英亩喷液量",
+  hintRate:"这是软件最重要的数字。按钮只是常见起点，请用下方的校准工具量出你自己的实际值。",
+  rate1:"大田 6", rate2:"果园 12", rate3:"榴莲 20", rate4:"高大密冠 30",
+  labConv:"常规喷雾用水量（过山泵／背包桶）",
+  hintConv:"只有当药剂按「标签每桶」或「稀释比例」输入时才会用到，用来换算成每英亩用量。例：40 棵 × 每棵 20 L = 800 L／英亩。",
+  labSplit:"分箱方式", splitEven:"每箱一样", splitFull:"先装满，最后余量",
+  secProducts:"药剂", secProductsNote:"一次最多 4 种。混配前请先确认药剂之间可以混用。",
+  prodName:"药剂名称", prodPlaceholder:"例：甲霜灵", unnamed:"药剂",
+  basisArea:"每英亩", basisTank:"标签每桶", basisRatio:"稀释比例",
+  doseArea:"每英亩用量", doseTank:"标签用量", doseRatio:"稀释比例 1 ∶",
+  perTank:"每", water:"L 水", btnAdd:"+ 添加药剂",
+  secResult:"配药单", secResultNote:"按这个装每一箱",
+  loads:"箱", perLoad:"每箱", loadN:"第 {n} 箱",
+  clearWater:"清水", totalSpray:"总喷液量", totalNeed:"药剂总需求量",
+  covers:"覆盖 {a} 英亩",
+  emptyMsg:"填入面积、喷液量和至少一种药剂，配药单就会出现在这里。",
+  errArea:"请填写喷药面积。", errRate:"请填写每英亩喷液量。", errTank:"请填写药箱容量。",
+  errConv:"有药剂按「标签每桶」或「稀释比例」输入，请先填写常规喷雾用水量。",
+  errDose:"请填写「{name}」的用量。",
+  concTitle:"药液浓度",
+  concLine:"{name}：每 L 药液 {perL}（{pct}%）",
+  multTitle:"比常规喷雾浓 {x} 倍",
+  multBody:"无人机用水量小，同样的每英亩药量会浓很多倍。这是正常的，但请先在几棵树上试喷，观察有无药害，再全园施用。",
+  multLow:"你设定的喷液量与常规喷雾接近，浓度没有明显变化。",
+  warnHighConc:"浓度较高（超过 5%）。请核对产品标签是否允许这个浓度，并先小范围试喷。",
+  warnVolume:"药剂体积已占药箱 {p}%。请先用桶预混稀释，再倒入药箱，并注意过滤。",
+  warnPartial:"最后一箱只装 {v} L，浓度与前面几箱相同。",
+  tipMix:"先在药箱里放约一半清水，逐一加入并搅匀每种药剂，最后补水至刻度。",
+  btnCopy:"复制配药单", copied:"已复制",
+  detCal:"校准：量出你自己的每英亩喷液量",
+  calIntro:"装一箱水，正常作业飞完，记录这一箱喷完覆盖了多大面积。",
+  calL:"这一箱装了多少水", calA:"喷完覆盖的面积",
+  calResult:"你的实际喷液量是 {v} L／英亩", calUse:"用这个数值",
+  detWhy:"为什么不能照搬桶装浓度",
+  why:["农药标签上的「每 16 L 水加 20 mL」，是给背包桶或过山泵写的。那种喷法一英亩要用几百升水。",
+       "无人机一英亩只喷十几二十升。如果照标签的浓度配，一英亩下去的药量只有常规的几十分之一，等于白喷。",
+       "正确做法只有一个：先算出<b>每英亩要多少药</b>，再把这个量装进无人机那一点点水里。本软件的「标签每桶」模式就是替你做这个换算。",
+       "所以「常规喷雾用水量」这一栏一定要填你自己真实的数字 —— 你以前用过山泵，一英亩实际打了多少水。"],
+  detTable:"DJI 机型药箱容量", thModel:"机型", thTank:"药箱容量",
+  tableNote:"喷洒药箱容量，撒肥料斗容量不在此列。资料核对于 2026 年 9 月。请以你自己那台机的实际容量为准。",
+  detMath:"计算方法",
+  math:["总喷液量 ＝ 面积 × 每英亩喷液量",
+        "箱数 ＝ 总喷液量 ÷ 药箱容量（进位取整）",
+        "每英亩药量 ＝ 标签用量 ÷ 标签水量 × 常规喷雾用水量（「标签每桶」模式）",
+        "每箱药量 ＝ 每英亩药量 × （每箱升数 ÷ 每英亩喷液量）",
+        "清水量 ＝ 每箱升数 － 液体药剂体积"],
+  detReset:"重设", btnReset:"清空全部输入", confirmReset:"确定清空全部输入？"
+},
+en:{
+  code:"EN", title:"DroneDose", sub:"DJI models as the baseline",
+  secInputs:"Spray setup", secInputsNote:"Every input the calculation needs sits here",
+  labDrone:"Drone model", custom:"Custom",
+  labTank:"Spray tank", hintTank:"Use what you actually load, not the rated maximum.",
+  labAreaUnit:"Measure the block by", uAc:"Acres", uHa:"Hectares", uTree:"Trees",
+  labArea:"Area to spray", labAreaTree:"Trees to spray",
+  labDensity:"Trees per acre", unTreesAc:"trees/acre", unAcre:"acre", unTree:"trees",
+  labRate:"Drone spray volume per acre",
+  hintRate:"This is the number that matters most. The buttons are common starting points — measure your own with the calibration tool below.",
+  rate1:"Field 6", rate2:"Orchard 12", rate3:"Durian 20", rate4:"Tall dense 30",
+  labConv:"Conventional spray water (power pump / knapsack)",
+  hintConv:"Used only when a product is entered as a label dose per tank or a dilution ratio, to convert it to a per-acre rate. Example: 40 trees × 20 L each = 800 L/acre.",
+  labSplit:"Split the loads", splitEven:"Same each load", splitFull:"Full loads, remainder last",
+  secProducts:"Products", secProductsNote:"Up to 4 at a time. Confirm the products are compatible before tank-mixing.",
+  prodName:"Product name", prodPlaceholder:"e.g. Metalaxyl", unnamed:"Product",
+  basisArea:"Per acre", basisTank:"Label per tank", basisRatio:"Dilution ratio",
+  doseArea:"Rate per acre", doseTank:"Label dose", doseRatio:"Dilution 1 :",
+  perTank:"per", water:"L water", btnAdd:"+ Add product",
+  secResult:"Mixing sheet", secResultNote:"Load every tank like this",
+  loads:"loads", perLoad:"per load", loadN:"Load {n}",
+  clearWater:"Water", totalSpray:"Total spray volume", totalNeed:"Total product needed",
+  covers:"covers {a} acres",
+  emptyMsg:"Enter an area, a spray volume and at least one product, and the mixing sheet appears here.",
+  errArea:"Enter the area to spray.", errRate:"Enter the spray volume per acre.", errTank:"Enter the tank volume.",
+  errConv:"A product is entered per label tank or as a ratio — fill in the conventional spray water volume first.",
+  errDose:"Enter a dose for \u201c{name}\u201d.",
+  concTitle:"Tank concentration",
+  concLine:"{name}: {perL} per L of mix ({pct}%)",
+  multTitle:"{x}× stronger than a conventional spray",
+  multBody:"A drone carries far less water, so the same per-acre dose ends up many times more concentrated. That is expected — but spray a few trees first and check for scorch before treating the whole block.",
+  multLow:"Your spray volume is close to a conventional spray, so the concentration barely changes.",
+  warnHighConc:"Concentration is above 5%. Check the label allows it, and test on a small area first.",
+  warnVolume:"Product makes up {p}% of the tank volume. Pre-mix in a bucket before filling the tank, and watch the filter.",
+  warnPartial:"The last load holds only {v} L, at the same concentration as the others.",
+  tipMix:"Half-fill the tank with water, add and stir in each product one at a time, then top up to the mark.",
+  btnCopy:"Copy mixing sheet", copied:"Copied",
+  detCal:"Calibrate: measure your own spray volume per acre",
+  calIntro:"Load one tank with water, fly it as you normally would, and note the area it covered.",
+  calL:"Water in that tank", calA:"Area it covered",
+  calResult:"Your real spray volume is {v} L/acre", calUse:"Use this value",
+  detWhy:"Why a knapsack dilution cannot be copied across",
+  why:["\u201c20 mL per 16 L of water\u201d on a label is written for a knapsack or a power pump. That way of spraying puts hundreds of litres on an acre.",
+       "A drone puts a dozen or two litres on the same acre. Mix to the label concentration and the acre receives a small fraction of the intended dose — the spray is wasted.",
+       "There is only one correct route: work out <b>how much product the acre needs</b>, then put that amount into the drone's much smaller volume of water. The label-per-tank mode does this conversion for you.",
+       "So the conventional water volume field must hold your own real figure — how much water your power pump actually put on an acre."],
+  detTable:"DJI spray tank capacities", thModel:"Model", thTank:"Spray tank",
+  tableNote:"Spray tank only; spreading hoppers are excluded. Checked September 2026. Confirm against your own aircraft.",
+  detMath:"How it calculates",
+  math:["Total spray volume = area × spray volume per acre",
+        "Loads = total volume ÷ tank volume, rounded up",
+        "Rate per acre = label dose ÷ label water × conventional water per acre (label-per-tank mode)",
+        "Product per load = rate per acre × (litres in that load ÷ spray volume per acre)",
+        "Water per load = litres in that load − volume of liquid product"],
+  detReset:"Reset", btnReset:"Clear every input", confirmReset:"Clear every input?"
+},
+ms:{
+  code:"BM", title:"DroneDose", sub:"Berasaskan model DJI",
+  secInputs:"Tetapan semburan", secInputsNote:"Semua input yang diperlukan ada di sini",
+  labDrone:"Model dron", custom:"Sendiri",
+  labTank:"Tangki racun", hintTank:"Guna jumlah yang anda betul-betul isi, bukan muatan maksimum.",
+  labAreaUnit:"Ukur kawasan ikut", uAc:"Ekar", uHa:"Hektar", uTree:"Pokok",
+  labArea:"Luas kawasan", labAreaTree:"Bilangan pokok",
+  labDensity:"Pokok se-ekar", unTreesAc:"pokok/ekar", unAcre:"ekar", unTree:"pokok",
+  labRate:"Isipadu semburan dron se-ekar",
+  hintRate:"Inilah angka yang paling penting. Butang di atas hanya titik mula biasa — ukur angka anda sendiri dengan alat penentukuran di bawah.",
+  rate1:"Sawah 6", rate2:"Dusun 12", rate3:"Durian 20", rate4:"Tinggi lebat 30",
+  labConv:"Air semburan biasa (pam tekanan tinggi / pam sandang)",
+  hintConv:"Hanya digunakan apabila dos dimasukkan sebagai dos label setangki atau nisbah pencairan, untuk menukarnya kepada kadar se-ekar. Contoh: 40 pokok × 20 L = 800 L/ekar.",
+  labSplit:"Cara bahagi muatan", splitEven:"Setiap muatan sama", splitFull:"Penuh dahulu, baki akhir",
+  secProducts:"Racun", secProductsNote:"Maksimum 4 pada satu masa. Pastikan racun boleh dicampur sebelum mencampurnya.",
+  prodName:"Nama racun", prodPlaceholder:"cth. Metalaxyl", unnamed:"Racun",
+  basisArea:"Se-ekar", basisTank:"Label setangki", basisRatio:"Nisbah",
+  doseArea:"Kadar se-ekar", doseTank:"Dos label", doseRatio:"Pencairan 1 :",
+  perTank:"per", water:"L air", btnAdd:"+ Tambah racun",
+  secResult:"Senarai campuran", secResultNote:"Isi setiap tangki begini",
+  loads:"muatan", perLoad:"per muatan", loadN:"Muatan {n}",
+  clearWater:"Air", totalSpray:"Jumlah isipadu semburan", totalNeed:"Jumlah racun diperlukan",
+  covers:"meliputi {a} ekar",
+  emptyMsg:"Masukkan luas kawasan, isipadu semburan dan sekurang-kurangnya satu racun — senarai campuran akan muncul di sini.",
+  errArea:"Masukkan luas kawasan.", errRate:"Masukkan isipadu semburan se-ekar.", errTank:"Masukkan isipadu tangki.",
+  errConv:"Ada racun yang dimasukkan ikut label setangki atau nisbah — isi dahulu isipadu air semburan biasa.",
+  errDose:"Masukkan dos untuk \u201c{name}\u201d.",
+  concTitle:"Kepekatan dalam tangki",
+  concLine:"{name}: {perL} setiap L campuran ({pct}%)",
+  multTitle:"{x} kali lebih pekat daripada semburan biasa",
+  multBody:"Dron membawa air jauh lebih sedikit, jadi dos se-ekar yang sama menjadi berkali ganda lebih pekat. Ini normal — tetapi sembur beberapa pokok dahulu dan periksa tanda terbakar sebelum merawat seluruh kebun.",
+  multLow:"Isipadu semburan anda hampir sama dengan semburan biasa, jadi kepekatan hampir tidak berubah.",
+  warnHighConc:"Kepekatan melebihi 5%. Pastikan label membenarkannya, dan uji di kawasan kecil dahulu.",
+  warnVolume:"Racun mengisi {p}% daripada isipadu tangki. Campur dahulu dalam baldi sebelum menuang ke tangki, dan perhatikan penapis.",
+  warnPartial:"Muatan terakhir hanya {v} L, dengan kepekatan yang sama seperti yang lain.",
+  tipMix:"Isi tangki separuh dengan air, masukkan dan kacau setiap racun satu demi satu, kemudian tambah air hingga penuh.",
+  btnCopy:"Salin senarai campuran", copied:"Disalin",
+  detCal:"Penentukuran: ukur isipadu semburan se-ekar anda sendiri",
+  calIntro:"Isi satu tangki dengan air, terbangkan seperti biasa, dan catat luas yang dilitupinya.",
+  calL:"Air dalam tangki itu", calA:"Luas yang dilitupi",
+  calResult:"Isipadu semburan sebenar anda ialah {v} L/ekar", calUse:"Guna nilai ini",
+  detWhy:"Mengapa pencairan pam sandang tidak boleh disalin terus",
+  why:["\u201c20 mL setiap 16 L air\u201d pada label ditulis untuk pam sandang atau pam tekanan tinggi. Cara itu menggunakan beratus liter se-ekar.",
+       "Dron hanya menyembur belasan hingga dua puluh liter se-ekar. Jika dicampur mengikut kepekatan label, ekar itu hanya menerima sepersekian daripada dos sebenar — semburan itu sia-sia.",
+       "Hanya ada satu cara yang betul: kira <b>berapa banyak racun diperlukan se-ekar</b>, kemudian masukkan jumlah itu ke dalam air dron yang jauh lebih sedikit. Mod label setangki melakukan penukaran ini untuk anda.",
+       "Jadi ruangan air semburan biasa mesti diisi dengan angka sebenar anda — berapa banyak air yang pam anda gunakan se-ekar."],
+  detTable:"Isipadu tangki racun DJI", thModel:"Model", thTank:"Tangki racun",
+  tableNote:"Tangki racun sahaja; hoper baja tidak disenaraikan. Disemak September 2026. Sahkan dengan dron anda sendiri.",
+  detMath:"Cara pengiraan",
+  math:["Jumlah isipadu semburan = luas × isipadu semburan se-ekar",
+        "Muatan = jumlah isipadu ÷ isipadu tangki, dibundarkan ke atas",
+        "Kadar se-ekar = dos label ÷ air label × air semburan biasa se-ekar (mod label setangki)",
+        "Racun per muatan = kadar se-ekar × (liter dalam muatan ÷ isipadu semburan se-ekar)",
+        "Air per muatan = liter dalam muatan − isipadu racun cecair"],
+  detReset:"Set semula", btnReset:"Kosongkan semua input", confirmReset:"Kosongkan semua input?"
+}
+};
+
+/* ===================== state ===================== */
+var KEY="dronedose.v1";
+var DEFAULT={
+  lang:null, size:0,
+  model:"T50", tank:40,
+  areaUnit:"ac", area:5, density:40,
+  rate:20, conv:800, split:"even",
+  products:[{name:"",basis:"area",unit:"ml",dose:"",labelTank:16,ratio:""}]
+};
+var S=load();
+
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(!raw) return clone(DEFAULT);
+    var o=JSON.parse(raw), d=clone(DEFAULT), k;
+    for(k in d){ if(Object.prototype.hasOwnProperty.call(o,k)) d[k]=o[k]; }
+    if(!Array.isArray(d.products)||!d.products.length) d.products=clone(DEFAULT.products);
+    return d;
+  }catch(e){ return clone(DEFAULT); }
+}
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function t(k){ return (I18N[S.lang]||I18N.zh)[k]; }
+function fill(s,o){ var k; for(k in o){ s=s.split("{"+k+"}").join(o[k]); } return s; }
+function $(id){ return document.getElementById(id); }
+
+/* ===================== number helpers ===================== */
+function num(v){ var n=parseFloat(v); return isFinite(n)?n:0; }
+function fmt(n){
+  if(!isFinite(n)) return "0";
+  var a=Math.abs(n), d;
+  if(a>=1000) d=0; else if(a>=100) d=0; else if(a>=10) d=1; else if(a>=1) d=2; else d=3;
+  var s=n.toFixed(d);
+  if(s.indexOf(".")>-1) s=s.replace(/0+$/,"").replace(/\.$/,"");
+  return s;
+}
+/* present an amount held in base units (mL or g) in the friendliest unit */
+function amount(base,liquid){
+  if(base>=1000) return fmt(base/1000)+(liquid?" L":" kg");
+  return fmt(base)+(liquid?" mL":" g");
+}
+var TO_BASE={ml:1,l:1000,g:1,kg:1000};
+function isLiquidUnit(u){ return u==="ml"||u==="l"; }
+
+/* ===================== core calculation ===================== */
+function compute(){
+  var r={ok:false,errors:[],warnings:[]};
+  var tank=num(S.tank), rate=num(S.rate), conv=num(S.conv);
+
+  var acres;
+  if(S.areaUnit==="ac") acres=num(S.area);
+  else if(S.areaUnit==="ha") acres=num(S.area)*2.471054;
+  else acres=num(S.density)>0 ? num(S.area)/num(S.density) : 0;
+
+  if(acres<=0) r.errors.push(t("errArea"));
+  if(rate<=0)  r.errors.push(t("errRate"));
+  if(tank<=0)  r.errors.push(t("errTank"));
+
+  var items=[], needConv=false, i, p, perAcre, liquid, base;
+  for(i=0;i<S.products.length;i++){
+    p=S.products[i];
+    liquid = p.basis==="ratio" ? true : isLiquidUnit(p.unit);
+    perAcre=0;
+    if(p.basis==="area"){
+      base=num(p.dose)*TO_BASE[p.unit];
+      perAcre=base;
+    }else if(p.basis==="tank"){
+      needConv=true;
+      base=num(p.dose)*TO_BASE[p.unit];
+      if(num(p.labelTank)>0) perAcre=base/num(p.labelTank)*conv;
+    }else{
+      needConv=true;
+      if(num(p.ratio)>0) perAcre=(1000/num(p.ratio))*conv;
+    }
+    var named = (p.name||"").trim();
+    var hasInput = p.basis==="ratio" ? num(p.ratio)>0 : num(p.dose)>0;
+    if(!hasInput && (named||S.products.length>1||i===0)){
+      if(named) r.errors.push(fill(t("errDose"),{name:named}));
+    }
+    if(perAcre>0){
+      items.push({
+        name: named || (t("unnamed")+" "+(i+1)),
+        perAcre:perAcre, liquid:liquid
+      });
+    }
+  }
+  if(needConv && conv<=0) r.errors.push(t("errConv"));
+  if(!items.length) r.errors.push(null); /* silent: nothing entered yet */
+
+  r.errors=r.errors.filter(function(x){return !!x;});
+  if(acres<=0||rate<=0||tank<=0||!items.length) return r;
+
+  var total=acres*rate;
+  var n=Math.max(1,Math.ceil(total/tank - 1e-9));
+  var loads=[], j;
+  if(S.split==="even"){
+    for(j=0;j<n;j++) loads.push(total/n);
+  }else{
+    for(j=0;j<n-1;j++) loads.push(tank);
+    loads.push(total-tank*(n-1));
+  }
+
+  r.ok=true; r.acres=acres; r.rate=rate; r.tank=tank; r.total=total;
+  r.n=n; r.loads=loads; r.items=items; r.conv=conv;
+  r.mult = conv>0 ? conv/rate : 0;
+
+  /* per-load detail */
+  r.rows=loads.map(function(L){
+    var acresHere=L/rate, liquidMl=0;
+    var chem=items.map(function(it){
+      var amt=it.perAcre*acresHere;
+      if(it.liquid) liquidMl+=amt;
+      return {name:it.name, base:amt, liquid:it.liquid};
+    });
+    return {L:L, acres:acresHere, chem:chem, water:Math.max(0,L-liquidMl/1000), liquidMl:liquidMl};
+  });
+
+  r.totals=items.map(function(it){
+    return {name:it.name, base:it.perAcre*acres, liquid:it.liquid,
+            perL:it.perAcre/rate, pct:(it.perAcre/rate)/10};
+  });
+
+  /* warnings */
+  var maxPct=0;
+  r.totals.forEach(function(x){ if(x.pct>maxPct) maxPct=x.pct; });
+  if(maxPct>5) r.warnings.push({tone:"red", text:t("warnHighConc")});
+
+  var volPct = r.rows[0].liquidMl/1000/r.rows[0].L*100;
+  if(volPct>10) r.warnings.push({tone:"amber", text:fill(t("warnVolume"),{p:fmt(volPct)})});
+
+  if(S.split==="full" && n>1){
+    var last=loads[n-1];
+    if(last < tank*0.98) r.warnings.push({tone:"blue", text:fill(t("warnPartial"),{v:fmt(last)})});
+  }
+  return r;
+}
+
+/* ===================== rendering ===================== */
+function renderChrome(){
+  document.documentElement.lang = S.lang==="zh"?"zh":(S.lang==="ms"?"ms":"en");
+  $("appTitle").textContent=t("title");
+  $("appSub").textContent=t("sub");
+  $("langBtn").textContent=t("code");
+  document.title=(S.lang==="zh"?"无人机配药 · DroneDose":"DroneDose");
+  var nodes=document.querySelectorAll("[data-t]"), i, k;
+  for(i=0;i<nodes.length;i++){
+    k=nodes[i].getAttribute("data-t");
+    if(t(k)!==undefined) nodes[i].textContent=t(k);
+  }
+  $("areaLab").textContent = S.areaUnit==="tree"? t("labAreaTree") : t("labArea");
+  $("areaSuffix").textContent = S.areaUnit==="ac"?t("unAcre"):(S.areaUnit==="ha"?t("uHa"):t("unTree"));
+  $("densityField").classList.toggle("hidden", S.areaUnit!=="tree");
+
+  /* reference blocks */
+  var why=t("why"), h="", i2;
+  for(i2=0;i2<why.length;i2++) h+="<p>"+why[i2]+"</p>";
+  $("whyBody").innerHTML=h;
+
+  var m=t("math"); h="";
+  for(i2=0;i2<m.length;i2++) h+="<p>"+m[i2]+"</p>";
+  $("mathBody").innerHTML=h;
+
+  h="<tr><th>"+t("thModel")+"</th><th class='num'>"+t("thTank")+"</th></tr>";
+  MODELS.forEach(function(x){ h+="<tr><td>Agras "+x.id+"</td><td class='num'>"+x.tank+" L</td></tr>"; });
+  $("modelTable").innerHTML=h;
+  $("tableNote").textContent=t("tableNote");
+}
+
+function chipRow(el,opts,active,onPick){
+  el.innerHTML="";
+  opts.forEach(function(o){
+    var b=document.createElement("button");
+    b.type="button"; b.className="chip"; b.textContent=o.label;
+    b.setAttribute("aria-pressed", o.value===active ? "true":"false");
+    b.addEventListener("click",function(){ onPick(o.value); });
+    el.appendChild(b);
+  });
+}
+
+function setVal(id,v){
+  var el=$(id);
+  if(el && document.activeElement!==el) el.value=v;
+}
+
+/* chips only — used while the user is typing, so live inputs are never rebuilt */
+function refreshChips(){
+  var f=MODELS.filter(function(m){return m.id===S.model;})[0];
+  if(f && Math.abs(num(S.tank)-f.tank)>1e-9) S.model="custom";
+  var opts=MODELS.map(function(m){ return {label:m.id,value:m.id}; });
+  opts.push({label:t("custom"),value:"custom"});
+  chipRow($("modelChips"),opts,S.model,function(v){
+    S.model=v;
+    var g=MODELS.filter(function(m){return m.id===v;})[0];
+    if(g){ S.tank=g.tank; $("tank").value=g.tank; }
+    save(); renderInputs(); renderResult();
+  });
+  chipRow($("rateChips"),[
+    {label:t("rate1"),value:6},{label:t("rate2"),value:12},
+    {label:t("rate3"),value:20},{label:t("rate4"),value:30}
+  ],num(S.rate),function(v){ S.rate=v; $("rate").value=v; save(); renderInputs(); renderResult(); });
+  renderSplitChips();
+}
+
+function splitOptions(){
+  var acres;
+  if(S.areaUnit==="ac") acres=num(S.area);
+  else if(S.areaUnit==="ha") acres=num(S.area)*2.471054;
+  else acres=num(S.density)>0 ? num(S.area)/num(S.density) : 0;
+
+  var tank=num(S.tank), rate=num(S.rate), total=acres*rate;
+  var even=t("splitEven"), full=t("splitFull");
+  if(acres>0 && rate>0 && tank>0){
+    var n=Math.max(1,Math.ceil(total/tank - 1e-9));
+    even += " · "+n+" × "+fmt(total/n)+" L";
+    if(n===1){
+      full += " · "+fmt(total)+" L";
+    }else{
+      var remainder=total-tank*(n-1);
+      full += " · "+(n-1)+" × "+fmt(tank)+" L + "+fmt(remainder)+" L";
+    }
+  }
+  return [
+    {label:even,value:"even"},
+    {label:full,value:"full"}
+  ];
+}
+
+function renderSplitChips(){
+  chipRow($("splitChips"),splitOptions(),S.split,function(v){
+    S.split=v; save(); renderInputs(); renderResult();
+  });
+}
+
+function renderInputs(){
+  var opts=MODELS.map(function(m){ return {label:m.id,value:m.id}; });
+  opts.push({label:t("custom"),value:"custom"});
+  chipRow($("modelChips"),opts,S.model,function(v){
+    S.model=v;
+    var f=MODELS.filter(function(m){return m.id===v;})[0];
+    if(f){ S.tank=f.tank; $("tank").value=f.tank; }
+    save(); renderInputs(); renderResult();
+  });
+
+  chipRow($("areaUnitChips"),[
+    {label:t("uAc"),value:"ac"},{label:t("uHa"),value:"ha"},{label:t("uTree"),value:"tree"}
+  ],S.areaUnit,function(v){ S.areaUnit=v; save(); renderChrome(); renderInputs(); renderResult(); });
+
+  chipRow($("rateChips"),[
+    {label:t("rate1"),value:6},{label:t("rate2"),value:12},
+    {label:t("rate3"),value:20},{label:t("rate4"),value:30}
+  ],num(S.rate),function(v){ S.rate=v; $("rate").value=v; save(); renderInputs(); renderResult(); });
+
+  renderSplitChips();
+
+  setVal("tank",S.tank); setVal("area",S.area); setVal("density",S.density);
+  setVal("rate",S.rate); setVal("conv",S.conv);
+
+  renderProducts();
+}
+
+function renderProducts(){
+  var list=$("prodList");
+  list.innerHTML="";
+  S.products.forEach(function(p,idx){
+    var d=document.createElement("div");
+    d.className="prod";
+
+    var top=document.createElement("div");
+    top.className="prod-top";
+    var nm=document.createElement("input");
+    nm.type="text"; nm.className="grow"; nm.value=p.name||"";
+    nm.placeholder=t("prodPlaceholder");
+    nm.setAttribute("aria-label",t("prodName"));
+    nm.addEventListener("input",function(){ p.name=nm.value; save(); renderResult(); });
+    top.appendChild(nm);
+    if(S.products.length>1){
+      var rm=document.createElement("button");
+      rm.type="button"; rm.className="icon-btn"; rm.textContent="×";
+      rm.setAttribute("aria-label","remove");
+      rm.addEventListener("click",function(){
+        S.products.splice(idx,1); save(); renderProducts(); renderResult();
+      });
+      top.appendChild(rm);
+    }
+    d.appendChild(top);
+
+    var bWrap=document.createElement("div"); bWrap.className="field";
+    var bChips=document.createElement("div"); bChips.className="chips grow";
+    chipRow(bChips,[
+      {label:t("basisArea"),value:"area"},
+      {label:t("basisTank"),value:"tank"},
+      {label:t("basisRatio"),value:"ratio"}
+    ],p.basis,function(v){ p.basis=v; save(); renderProducts(); renderResult(); });
+    bWrap.appendChild(bChips);
+    d.appendChild(bWrap);
+
+    if(p.basis==="ratio"){
+      d.appendChild(numField(t("doseRatio"),p.ratio,"",function(v){ p.ratio=v; save(); renderResult(); }));
+    }else{
+      var lab = p.basis==="area" ? t("doseArea") : t("doseTank");
+      var f=document.createElement("div"); f.className="field";
+      var l=document.createElement("label"); l.className="lab"; l.textContent=lab; f.appendChild(l);
+
+      var row=document.createElement("div"); row.className="row joined";
+      var inp=document.createElement("input");
+      inp.type="number"; inp.className="grow"; inp.inputMode="decimal";
+      inp.min="0"; inp.step="0.1"; inp.value=p.dose;
+      inp.addEventListener("input",function(){ p.dose=inp.value; save(); renderResult(); });
+      row.appendChild(inp);
+      var sfx=document.createElement("div"); sfx.className="suffix";
+      sfx.textContent = p.basis==="area" ? ("/ "+t("unAcre")) : "";
+      if(p.basis==="area") row.appendChild(sfx);
+      f.appendChild(row);
+
+      var uChips=document.createElement("div"); uChips.className="chips grow";
+      uChips.style.marginTop="6px";
+      chipRow(uChips,[
+        {label:"mL",value:"ml"},{label:"L",value:"l"},
+        {label:"g",value:"g"},{label:"kg",value:"kg"}
+      ],p.unit,function(v){ p.unit=v; save(); renderProducts(); renderResult(); });
+      f.appendChild(uChips);
+      d.appendChild(f);
+
+      if(p.basis==="tank"){
+        d.appendChild(numField(t("perTank"),p.labelTank,t("water"),function(v){ p.labelTank=v; save(); renderResult(); }));
+      }
+    }
+    list.appendChild(d);
+  });
+  $("addProd").style.display = S.products.length>=4 ? "none":"block";
+}
+
+function numField(labelText,value,suffixText,onInput){
+  var f=document.createElement("div"); f.className="field";
+  var l=document.createElement("label"); l.className="lab"; l.textContent=labelText;
+  f.appendChild(l);
+  var row=document.createElement("div"); row.className="row joined";
+  var inp=document.createElement("input");
+  inp.type="number"; inp.className="grow"; inp.inputMode="decimal";
+  inp.min="0"; inp.step="1"; inp.value=value;
+  inp.addEventListener("input",function(){ onInput(inp.value); });
+  row.appendChild(inp);
+  if(suffixText){ var s=document.createElement("div"); s.className="suffix"; s.textContent=suffixText; row.appendChild(s); }
+  f.appendChild(row);
+  return f;
+}
+
+function renderResult(){
+  var r=compute(), body=$("resultBody"), h="";
+
+  if(!r.ok){
+    if(r.errors.length){
+      r.errors.forEach(function(e){ h+='<div class="note red">'+esc(e)+'</div>'; });
+    }else{
+      h='<p style="color:#A9C2D4;margin:0">'+esc(t("emptyMsg"))+'</p>';
+    }
+    body.innerHTML=h;
+    return;
+  }
+
+  /* hero */
+  h+='<div class="headline">'+r.n+' <span class="u">'+esc(t("loads"))+'</span> &nbsp;'+
+     fmt(r.loads[0])+' <span class="u">L '+esc(t("perLoad"))+'</span></div>';
+
+  /* tank glyphs */
+  h+='<div class="tanks">';
+  var show=Math.min(r.n,14), i;
+  for(i=0;i<show;i++){
+    var pc=Math.max(8,Math.round(r.loads[i]/r.tank*100));
+    var part = r.loads[i] < r.tank*0.98;
+    h+='<div class="tank'+(part?' part':'')+'"><i style="height:'+pc+'%"></i><b>'+(i+1)+'</b></div>';
+  }
+  h+='</div>';
+  if(r.n>show) h+='<p class="sec-note" style="margin:4px 0 0">+'+(r.n-show)+'</p>';
+
+  /* per-load recipe */
+  var uniq = S.split==="even" ? 1 : (r.n>1 && r.loads[r.n-1]<r.tank*0.98 ? 2 : 1);
+  for(i=0;i<uniq;i++){
+    var idx = i===0?0:r.n-1;
+    var row=r.rows[idx];
+    h+='<div class="load">';
+    h+='<div class="load-h">'+
+        (uniq===1 ? esc(t("perLoad"))+" · "+fmt(row.L)+" L" : esc(fill(t("loadN"),{n:idx+1}))+" · "+fmt(row.L)+" L")+
+        ' · '+esc(fill(t("covers"),{a:fmt(row.acres)}))+'</div>';
+    h+='<div class="line water"><span class="k">'+esc(t("clearWater"))+'</span><span class="v">'+fmt(row.water)+' L</span></div>';
+    row.chem.forEach(function(c){
+      h+='<div class="line chem"><span class="k">'+esc(c.name)+'</span><span class="v">'+amount(c.base,c.liquid)+'</span></div>';
+    });
+    h+='</div>';
+  }
+
+  /* totals */
+  h+='<div class="totals">';
+  h+='<div class="line"><span class="k">'+esc(t("totalSpray"))+'</span><span class="v">'+fmt(r.total)+' L</span></div>';
+  r.totals.forEach(function(x){
+    h+='<div class="line"><span class="k">'+esc(x.name)+' · '+esc(t("totalNeed"))+'</span><span class="v">'+amount(x.base,x.liquid)+'</span></div>';
+  });
+  h+='</div>';
+
+  /* concentration */
+  if(r.mult>0){
+    if(r.mult>=1.5){
+      h+='<div class="note amber"><span class="mult">'+esc(fill(t("multTitle"),{x:fmt(r.mult)}))+'</span>'+esc(t("multBody"))+'</div>';
+    }else{
+      h+='<div class="note blue">'+esc(t("multLow"))+'</div>';
+    }
+  }
+  var cl="";
+  r.totals.forEach(function(x){
+    cl+=esc(fill(t("concLine"),{
+      name:x.name,
+      perL:amount(x.perL,x.liquid),
+      pct:fmt(x.pct)
+    }))+"<br>";
+  });
+  h+='<div class="note blue"><b>'+esc(t("concTitle"))+'</b><br>'+cl+'</div>';
+
+  r.warnings.forEach(function(w){ h+='<div class="note '+w.tone+'">'+esc(w.text)+'</div>'; });
+  h+='<div class="note green">'+esc(t("tipMix"))+'</div>';
+
+  body.innerHTML=h;
+}
+
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* ===================== copy ===================== */
+function sheetText(){
+  var r=compute();
+  if(!r.ok) return "";
+  var L=[];
+  L.push(t("title")+" — "+t("secResult"));
+  L.push(fmt(r.acres)+" "+t("unAcre")+" · "+fmt(r.rate)+" L/"+t("unAcre")+" · "+fmt(r.total)+" L");
+  L.push(r.n+" "+t("loads")+" × "+fmt(r.loads[0])+" L");
+  L.push("");
+  var row=r.rows[0];
+  L.push(t("perLoad")+" ("+fmt(row.L)+" L):");
+  L.push("  "+t("clearWater")+": "+fmt(row.water)+" L");
+  row.chem.forEach(function(c){ L.push("  "+c.name+": "+amount(c.base,c.liquid)); });
+  if(S.split==="full" && r.n>1 && r.loads[r.n-1]<r.tank*0.98){
+    var last=r.rows[r.n-1];
+    L.push("");
+    L.push(fill(t("loadN"),{n:r.n})+" ("+fmt(last.L)+" L):");
+    L.push("  "+t("clearWater")+": "+fmt(last.water)+" L");
+    last.chem.forEach(function(c){ L.push("  "+c.name+": "+amount(c.base,c.liquid)); });
+  }
+  L.push("");
+  r.totals.forEach(function(x){ L.push(t("totalNeed")+" — "+x.name+": "+amount(x.base,x.liquid)); });
+  if(r.mult>=1.5) L.push(fill(t("multTitle"),{x:fmt(r.mult)}));
+  return L.join("\n");
+}
+
+/* ===================== wiring ===================== */
+function bindNum(id,key){
+  $(id).addEventListener("input",function(){
+    S[key]=$(id).value;
+    if(key==="rate"||key==="tank") refreshChips();
+    else if(key==="area"||key==="density") renderSplitChips();
+    save(); renderResult();
+  });
+}
+bindNum("tank","tank"); bindNum("area","area"); bindNum("density","density");
+bindNum("rate","rate"); bindNum("conv","conv");
+
+$("addProd").addEventListener("click",function(){
+  if(S.products.length>=4) return;
+  S.products.push({name:"",basis:"area",unit:"ml",dose:"",labelTank:16,ratio:""});
+  save(); renderProducts(); renderResult();
+});
+
+$("langBtn").addEventListener("click",function(){
+  var order=["zh","en","ms"];
+  S.lang=order[(order.indexOf(S.lang)+1)%3];
+  save(); renderChrome(); renderInputs(); renderResult();
+});
+
+var SIZES=[17,19,21];
+$("sizeBtn").addEventListener("click",function(){
+  S.size=(S.size+1)%SIZES.length;
+  document.documentElement.style.setProperty("--base",SIZES[S.size]+"px");
+  save();
+});
+
+$("copyBtn").addEventListener("click",function(){
+  var txt=sheetText();
+  if(!txt) return;
+  var done=function(){
+    var b=$("copyBtn"), old=b.textContent;
+    b.textContent=t("copied");
+    setTimeout(function(){ b.textContent=t("btnCopy"); },1600);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done,function(){ fallbackCopy(txt); done(); });
+  }else{ fallbackCopy(txt); done(); }
+});
+function fallbackCopy(txt){
+  var ta=document.createElement("textarea");
+  ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+function calUpdate(){
+  var L=num($("calL").value), a=num($("calA").value), out=$("calOut");
+  if(L>0 && a>0){
+    var v=L/a;
+    out.innerHTML='<div class="note green">'+esc(fill(t("calResult"),{v:fmt(v)}))+'</div>';
+    out.dataset.v=v;
+  }else{ out.innerHTML=""; out.dataset.v=""; }
+}
+$("calL").addEventListener("input",calUpdate);
+$("calA").addEventListener("input",calUpdate);
+$("calUse").addEventListener("click",function(){
+  var v=parseFloat($("calOut").dataset.v||"");
+  if(isFinite(v)&&v>0){
+    S.rate=Math.round(v*10)/10; save();
+    renderInputs(); renderResult();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+});
+
+$("resetBtn").addEventListener("click",function(){
+  if(!window.confirm(t("confirmReset"))) return;
+  var lang=S.lang, size=S.size;
+  S=clone(DEFAULT); S.lang=lang; S.size=size;
+  save(); renderChrome(); renderInputs(); renderResult();
+});
+
+/* language gate */
+var gate=$("gate");
+gate.addEventListener("click",function(e){
+  var b=e.target.closest ? e.target.closest("[data-setlang]") : null;
+  if(!b) return;
+  S.lang=b.getAttribute("data-setlang");
+  save(); gate.classList.add("hidden");
+  renderChrome(); renderInputs(); renderResult();
+});
+
+/* boot */
+document.documentElement.style.setProperty("--base",SIZES[S.size||0]+"px");
+if(S.lang){
+  gate.classList.add("hidden");
+  renderChrome(); renderInputs(); renderResult();
+}else{
+  S.lang="zh";
+  renderChrome(); renderInputs(); renderResult();
+  S.lang=null;
+  gate.classList.remove("hidden");
+}
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
