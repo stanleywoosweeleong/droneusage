@@ -280,8 +280,8 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
     <div class="sec-body">
 
       <div class="field">
-        <label class="lab" data-t="labDrone">无人机机型</label>
-        <details class="model-picker" id="modelPicker">
+        <div class="lab" id="droneModelLabel" data-t="labDrone">无人机机型</div>
+        <details class="model-picker" id="modelPicker" aria-labelledby="droneModelLabel">
           <summary><span id="modelSummary">T50 · 40 L</span></summary>
           <div class="model-picker-body"><div class="chips" id="modelChips"></div></div>
         </details>
@@ -297,8 +297,8 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
       </div>
 
       <div class="field">
-        <label class="lab" data-t="labAreaUnit">大疆测绘面积单位</label>
-        <div class="chips grow" id="areaUnitChips"></div>
+        <div class="lab" id="areaUnitLabel" data-t="labAreaUnit">大疆测绘面积单位</div>
+        <div class="chips grow" id="areaUnitChips" role="group" aria-labelledby="areaUnitLabel"></div>
       </div>
 
       <div class="field">
@@ -387,9 +387,9 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
         </div>
       </details>
       <div class="field load-choice">
-        <label class="lab" data-t="labSplit">分箱方式</label>
+        <div class="lab" id="loadSplitLabel" data-t="labSplit">分箱方式</div>
         <p class="hint" data-t="hintSplit">最后决定每桶装同样多，还是先装满、最后一桶装余量。</p>
-        <div class="chips grow" id="splitChips"></div>
+        <div class="chips grow" id="splitChips" role="group" aria-labelledby="loadSplitLabel"></div>
       </div>
     </div>
   </section>
