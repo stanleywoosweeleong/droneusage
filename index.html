@@ -46,13 +46,6 @@ body{
 }
 .wrap{max-width:560px;margin:0 auto;padding:0 14px 80px}
 
-.journey{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}
-.journey-step{min-width:0;padding:9px 6px;text-align:center;background:#DCE4EA;border:1px solid var(--line-strong);color:var(--ink-2);font-size:.78em;font-weight:700}
-.journey-step b{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;margin-right:4px;background:var(--ink);color:#fff;border-radius:50%;font-size:.9em}
-.intro{margin-top:10px;padding:12px 14px;background:var(--blue-soft);border:2px solid var(--blue);border-radius:var(--radius);color:#0A2E45}
-.intro strong{display:block;font-size:1em;font-weight:800;margin-bottom:2px}
-.intro span{display:block;font-size:.86em;font-weight:600;line-height:1.4}
-
 /* ---------- header ---------- */
 header{
   position:sticky;top:0;z-index:40;
@@ -158,8 +151,6 @@ input.bad{border-color:var(--red);background:var(--red-soft)}
 }
 .btn.solid{background:var(--ink);color:#fff}
 .btn:active{transform:translateY(1px)}
-.btn:disabled{background:#DCE4EA;color:#526779;border-color:#8FA3B3;cursor:not-allowed;transform:none}
-#viewResult{margin-top:14px;box-shadow:0 4px 16px rgba(14,34,51,.18)}
 
 /* ---------- results ---------- */
 .result{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -268,16 +259,6 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
 
 <div class="wrap">
 
-  <nav class="journey" aria-label="workflow">
-    <div class="journey-step"><b>1</b><span data-t="stepSetup">设定</span></div>
-    <div class="journey-step"><b>2</b><span data-t="stepProducts">药剂</span></div>
-    <div class="journey-step"><b>3</b><span data-t="stepSheet">配药单</span></div>
-  </nav>
-  <div class="intro">
-    <strong data-t="startTitle">先填作业资料，再照配药单装每一箱</strong>
-    <span data-t="startBody">所有结果会自动更新；请特别核对每英亩喷液量和产品标签。</span>
-  </div>
-
   <!-- ============ INPUTS ============ -->
   <section>
     <div class="sec-head">
@@ -359,8 +340,6 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
       </div>
     </div>
   </section>
-
-  <button class="btn solid" id="viewResult" disabled data-t="btnCompleteInputs">填完资料后查看配药单</button>
 
   <!-- ============ RESULTS ============ -->
   <section class="result" id="resultSec">
@@ -452,9 +431,6 @@ var MODELS = [
 var I18N = {
 zh:{
   code:"中文", title:"无人机配药", sub:"以 DJI 机型为基准",
-  stepSetup:"设定", stepProducts:"药剂", stepSheet:"配药单",
-  startTitle:"先填作业资料，再照配药单装每一箱",
-  startBody:"所有结果会自动更新；请特别核对每英亩喷液量和产品标签。",
   secInputs:"喷药设定", secInputsNote:"计算所需的全部输入都在这里",
   labDrone:"无人机机型", custom:"自定",
   labTank:"药箱容量", hintTank:"以你实际装的量为准，不必装满。",
@@ -493,7 +469,7 @@ zh:{
   warnVolume:"药剂体积已占药箱 {p}%。请先用桶预混稀释，再倒入药箱，并注意过滤。",
   warnPartial:"最后一箱只装 {v} L，浓度与前面几箱相同。",
   tipMix:"先在药箱里放约一半清水，逐一加入并搅匀每种药剂，最后补水至刻度。",
-  btnCopy:"复制配药单", copied:"已复制", btnCompleteInputs:"填完资料后查看配药单", btnViewResult:"查看配药单 ↓",
+  btnCopy:"复制配药单", copied:"已复制",
   detCal:"校准：量出你自己的每英亩喷液量",
   calIntro:"装一箱水，正常作业飞完，记录这一箱喷完覆盖了多大面积。",
   calL:"这一箱装了多少水", calA:"喷完覆盖的面积",
@@ -515,9 +491,6 @@ zh:{
 },
 en:{
   code:"EN", title:"DroneDose", sub:"DJI models as the baseline",
-  stepSetup:"Setup", stepProducts:"Products", stepSheet:"Mixing sheet",
-  startTitle:"Enter the job details, then load every tank from the mixing sheet",
-  startBody:"Results update automatically. Check the spray volume per acre and every product label carefully.",
   secInputs:"Spray setup", secInputsNote:"Every input the calculation needs sits here",
   labDrone:"Drone model", custom:"Custom",
   labTank:"Spray tank", hintTank:"Use what you actually load, not the rated maximum.",
@@ -556,7 +529,7 @@ en:{
   warnVolume:"Product makes up {p}% of the tank volume. Pre-mix in a bucket before filling the tank, and watch the filter.",
   warnPartial:"The last load holds only {v} L, at the same concentration as the others.",
   tipMix:"Half-fill the tank with water, add and stir in each product one at a time, then top up to the mark.",
-  btnCopy:"Copy mixing sheet", copied:"Copied", btnCompleteInputs:"Complete the details to view the mixing sheet", btnViewResult:"View mixing sheet ↓",
+  btnCopy:"Copy mixing sheet", copied:"Copied",
   detCal:"Calibrate: measure your own spray volume per acre",
   calIntro:"Load one tank with water, fly it as you normally would, and note the area it covered.",
   calL:"Water in that tank", calA:"Area it covered",
@@ -578,9 +551,6 @@ en:{
 },
 ms:{
   code:"BM", title:"DroneDose", sub:"Berasaskan model DJI",
-  stepSetup:"Tetapan", stepProducts:"Racun", stepSheet:"Senarai",
-  startTitle:"Isi maklumat kerja, kemudian ikut senarai campuran untuk setiap tangki",
-  startBody:"Keputusan dikemas kini secara automatik. Semak isipadu semburan se-ekar dan setiap label racun dengan teliti.",
   secInputs:"Tetapan semburan", secInputsNote:"Semua input yang diperlukan ada di sini",
   labDrone:"Model dron", custom:"Sendiri",
   labTank:"Tangki racun", hintTank:"Guna jumlah yang anda betul-betul isi, bukan muatan maksimum.",
@@ -619,7 +589,7 @@ ms:{
   warnVolume:"Racun mengisi {p}% daripada isipadu tangki. Campur dahulu dalam baldi sebelum menuang ke tangki, dan perhatikan penapis.",
   warnPartial:"Muatan terakhir hanya {v} L, dengan kepekatan yang sama seperti yang lain.",
   tipMix:"Isi tangki separuh dengan air, masukkan dan kacau setiap racun satu demi satu, kemudian tambah air hingga penuh.",
-  btnCopy:"Salin senarai campuran", copied:"Disalin", btnCompleteInputs:"Lengkapkan maklumat untuk melihat senarai", btnViewResult:"Lihat senarai campuran ↓",
+  btnCopy:"Salin senarai campuran", copied:"Disalin",
   detCal:"Penentukuran: ukur isipadu semburan se-ekar anda sendiri",
   calIntro:"Isi satu tangki dengan air, terbangkan seperti biasa, dan catat luas yang dilitupinya.",
   calL:"Air dalam tangki itu", calA:"Luas yang dilitupi",
@@ -995,9 +965,6 @@ function numField(labelText,value,suffixText,onInput){
 
 function renderResult(){
   var r=compute(), body=$("resultBody"), h="";
-  var jump=$("viewResult");
-  jump.disabled=!r.ok;
-  jump.textContent=r.ok?t("btnViewResult"):t("btnCompleteInputs");
 
   if(!r.ok){
     if(r.errors.length){
@@ -1146,10 +1113,6 @@ $("copyBtn").addEventListener("click",function(){
   }else{ fallbackCopy(txt); done(); }
 });
 
-$("viewResult").addEventListener("click",function(){
-  if(this.disabled) return;
-  $("resultSec").scrollIntoView({behavior:"smooth",block:"start"});
-});
 function fallbackCopy(txt){
   var ta=document.createElement("textarea");
   ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
