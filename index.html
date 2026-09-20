@@ -454,11 +454,11 @@ zh:{
   labSplit:"分箱方式", hintSplit:"最后决定每箱装同样多，还是先装满、最后一箱装余量。", splitEven:"每箱一样", splitFull:"先装满，最后余量",
   secProducts:"药剂", secProductsNote:"一次最多 4 种。混配前请先确认药剂之间可以混用。",
   prodName:"药剂名称", unnamed:"药剂",
-  basisArea:"每英亩", basisTank:"标签每桶", basisRatio:"稀释比例",
+  basisArea:"每英亩", basisTank:"标签每桶", basisRatio:"换算地面稀释",
   basisHelpArea:"标签例子：每英亩 500 mL。直接填写标签规定的每英亩用量。",
   basisHelpTank:"标签例子：每 16 L 水加 20 mL。本软件会先换算成每英亩用量。",
-  basisHelpRatio:"标签例子：稀释 1:1000。本软件会先换算成每英亩用量。",
-  doseArea:"每英亩用量", doseTank:"标签用量", doseRatio:"稀释比例 1 ∶",
+  basisHelpRatio:"地面喷雾例子：稀释 1:1000。本软件不会把 1:1000 直接照搬到无人机；它会按常规每英亩用水量换算，保留每英亩药量。",
+  doseArea:"每英亩用量", doseTank:"标签用量", doseRatio:"地面稀释 1 ∶",
   perTank:"每", water:"L 水", btnAdd:"+ 添加药剂",
   secResult:"配药单", secResultNote:"按这个装每一箱",
   loads:"箱", perLoad:"每箱", loadN:"第 {n} 箱",
@@ -474,6 +474,7 @@ zh:{
   multBody:"无人机用水量小，同样的每英亩药量会浓很多倍。这是正常的，但请先在几棵树上试喷，观察有无药害，再全园施用。",
   multLow:"你设定的喷液量与常规喷雾接近，浓度没有明显变化。",
   warnHighConc:"浓度较高（超过 5%）。请核对产品标签是否允许这个浓度，并先小范围试喷。",
+  warnRatioConversion:"已把地面稀释比例换算为每英亩药量。只有产品允许无人机／航空施用，并允许换算后的浓度与最低用水量时才可使用。",
   warnVolume:"药剂体积已占药箱 {p}%。请先用桶预混稀释，再倒入药箱，并注意过滤。",
   warnPartial:"最后一箱只装 {v} L，浓度与前面几箱相同。",
   tipMix:"先在药箱里放约一半清水，逐一加入并搅匀每种药剂，最后补水至刻度。",
@@ -515,11 +516,11 @@ en:{
   labSplit:"Split the loads", hintSplit:"Finally, choose equal loads or full tanks with a smaller last load.", splitEven:"Same each load", splitFull:"Full loads, remainder last",
   secProducts:"Products", secProductsNote:"Up to 4 at a time. Confirm the products are compatible before tank-mixing.",
   prodName:"Product name", unnamed:"Product",
-  basisArea:"Per acre", basisTank:"Label per tank", basisRatio:"Dilution ratio",
+  basisArea:"Per acre", basisTank:"Label per tank", basisRatio:"Convert ground dilution",
   basisHelpArea:"Label example: 500 mL per acre. Enter the label's per-acre rate directly.",
   basisHelpTank:"Label example: 20 mL per 16 L water. The app first converts this to a per-acre rate.",
-  basisHelpRatio:"Label example: dilute 1:1000. The app first converts this to a per-acre rate.",
-  doseArea:"Rate per acre", doseTank:"Label dose", doseRatio:"Dilution 1 :",
+  basisHelpRatio:"Ground-spray example: dilute 1:1000. The app does not copy 1:1000 into the drone tank; it uses conventional water per acre to preserve the product dose per acre.",
+  doseArea:"Rate per acre", doseTank:"Label dose", doseRatio:"Ground dilution 1 :",
   perTank:"per", water:"L water", btnAdd:"+ Add product",
   secResult:"Mixing sheet", secResultNote:"Load every tank like this",
   loads:"loads", perLoad:"per load", loadN:"Load {n}",
@@ -535,6 +536,7 @@ en:{
   multBody:"A drone carries far less water, so the same per-acre dose ends up many times more concentrated. That is expected — but spray a few trees first and check for scorch before treating the whole block.",
   multLow:"Your spray volume is close to a conventional spray, so the concentration barely changes.",
   warnHighConc:"Concentration is above 5%. Check the label allows it, and test on a small area first.",
+  warnRatioConversion:"A ground-spray dilution was converted into a product dose per acre. Use it only when drone/aerial application, the resulting concentration and the minimum carrier volume are permitted.",
   warnVolume:"Product makes up {p}% of the tank volume. Pre-mix in a bucket before filling the tank, and watch the filter.",
   warnPartial:"The last load holds only {v} L, at the same concentration as the others.",
   tipMix:"Half-fill the tank with water, add and stir in each product one at a time, then top up to the mark.",
@@ -576,11 +578,11 @@ ms:{
   labSplit:"Cara bahagi muatan", hintSplit:"Akhir sekali, pilih muatan sama rata atau tangki penuh dengan muatan terakhir yang lebih kecil.", splitEven:"Setiap muatan sama", splitFull:"Penuh dahulu, baki akhir",
   secProducts:"Racun", secProductsNote:"Maksimum 4 pada satu masa. Pastikan racun boleh dicampur sebelum mencampurnya.",
   prodName:"Nama racun", unnamed:"Racun",
-  basisArea:"Se-ekar", basisTank:"Label setangki", basisRatio:"Nisbah",
+  basisArea:"Se-ekar", basisTank:"Label setangki", basisRatio:"Tukar pencairan darat",
   basisHelpArea:"Contoh label: 500 mL se-ekar. Masukkan kadar se-ekar pada label secara terus.",
   basisHelpTank:"Contoh label: 20 mL bagi 16 L air. Perisian menukarnya dahulu kepada kadar se-ekar.",
-  basisHelpRatio:"Contoh label: pencairan 1:1000. Perisian menukarnya dahulu kepada kadar se-ekar.",
-  doseArea:"Kadar se-ekar", doseTank:"Dos label", doseRatio:"Pencairan 1 :",
+  basisHelpRatio:"Contoh semburan darat: pencairan 1:1000. Perisian tidak menyalin 1:1000 terus ke tangki dron; ia menggunakan air biasa se-ekar untuk mengekalkan dos racun se-ekar.",
+  doseArea:"Kadar se-ekar", doseTank:"Dos label", doseRatio:"Pencairan darat 1 :",
   perTank:"per", water:"L air", btnAdd:"+ Tambah racun",
   secResult:"Senarai campuran", secResultNote:"Isi setiap tangki begini",
   loads:"muatan", perLoad:"per muatan", loadN:"Muatan {n}",
@@ -596,6 +598,7 @@ ms:{
   multBody:"Dron membawa air jauh lebih sedikit, jadi dos se-ekar yang sama menjadi berkali ganda lebih pekat. Ini normal — tetapi sembur beberapa pokok dahulu dan periksa tanda terbakar sebelum merawat seluruh kebun.",
   multLow:"Isipadu semburan anda hampir sama dengan semburan biasa, jadi kepekatan hampir tidak berubah.",
   warnHighConc:"Kepekatan melebihi 5%. Pastikan label membenarkannya, dan uji di kawasan kecil dahulu.",
+  warnRatioConversion:"Pencairan semburan darat telah ditukar kepada dos racun se-ekar. Guna hanya jika aplikasi dron/udara, kepekatan terhasil dan isipadu pembawa minimum dibenarkan.",
   warnVolume:"Racun mengisi {p}% daripada isipadu tangki. Campur dahulu dalam baldi sebelum menuang ke tangki, dan perhatikan penapis.",
   warnPartial:"Muatan terakhir hanya {v} L, dengan kepekatan yang sama seperti yang lain.",
   tipMix:"Isi tangki separuh dengan air, masukkan dan kacau setiap racun satu demi satu, kemudian tambah air hingga penuh.",
@@ -706,7 +709,7 @@ function compute(){
   if(rate<=0)  r.errors.push(t("errRate"));
   if(tank<=0)  r.errors.push(t("errTank"));
 
-  var items=[], needConv=false, i, p, perAcre, liquid, base;
+  var items=[], needConv=false, hasRatio=false, i, p, perAcre, liquid, base;
   for(i=0;i<S.products.length;i++){
     p=S.products[i];
     liquid = p.basis==="ratio" ? true : isLiquidUnit(p.unit);
@@ -720,7 +723,7 @@ function compute(){
       if(num(p.labelTank)>0) perAcre=base/num(p.labelTank)*conv;
     }else{
       needConv=true;
-      if(num(p.ratio)>0) perAcre=(1000/num(p.ratio))*conv;
+      if(num(p.ratio)>0){ hasRatio=true; perAcre=(1000/num(p.ratio))*conv; }
     }
     var named = (p.name||"").trim();
     var hasInput = p.basis==="ratio" ? num(p.ratio)>0 : num(p.dose)>0;
@@ -774,6 +777,7 @@ function compute(){
   var maxPct=0;
   r.totals.forEach(function(x){ if(x.pct>maxPct) maxPct=x.pct; });
   if(maxPct>5) r.warnings.push({tone:"red", text:t("warnHighConc")});
+  if(hasRatio) r.warnings.push({tone:"amber", text:t("warnRatioConversion")});
 
   var volPct = r.rows[0].liquidMl/1000/r.rows[0].L*100;
   if(volPct>10) r.warnings.push({tone:"amber", text:fill(t("warnVolume"),{p:fmt(volPct)})});
@@ -1165,7 +1169,7 @@ $("rate").addEventListener("input",function(){
 
 $("addProd").addEventListener("click",function(){
   if(S.products.length>=4) return;
-  S.products.push({name:"",basis:"area",unit:"ml",dose:"",labelTank:16,ratio:""});
+  S.products.push({name:"",basis:"area",unit:"ml",dose:"",labelTank:"",ratio:""});
   save(); renderProducts(); renderResult();
 });
 

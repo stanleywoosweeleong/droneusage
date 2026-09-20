@@ -29,7 +29,7 @@ const prelude = `
 var S = null;
 function t(k){ return {errArea:"ERR_AREA",errRate:"ERR_RATE",errTank:"ERR_TANK",
   errConv:"ERR_CONV",errDose:"ERR_DOSE {name}",prodName:"Product",unnamed:"Product",
-  warnHighConc:"HIGH_CONC",warnVolume:"VOL {p}",warnPartial:"PARTIAL {v}"}[k] || k; }
+  warnHighConc:"HIGH_CONC",warnRatioConversion:"RATIO_CONVERSION",warnVolume:"VOL {p}",warnPartial:"PARTIAL {v}"}[k] || k; }
 function fill(s,o){ var k; for(k in o){ s=s.split("{"+k+"}").join(o[k]); } return s; }
 `;
 
@@ -97,6 +97,7 @@ S2({ products: [{ name: "Ratio", basis: "ratio", unit: "ml", dose: "", labelTank
 r = compute();
 check('1:800 at 800 L/acre = 1000 mL/acre', r.totals[0].base / r.acres, 1000, 1e-9);
 check('ratio products are liquid', r.totals[0].liquid, true);
+check('ratio conversion warning is shown', r.warnings.some(w => w.text === 'RATIO_CONVERSION'), true);
 
 group('6. Area unit conversions');
 S2({ areaUnit: "ha", area: 2 }); r = compute();
