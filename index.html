@@ -301,14 +301,6 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
         </div>
       </div>
 
-      <div class="field hidden" id="densityField">
-        <label class="lab" for="density" data-t="labDensity">每英亩树数</label>
-        <div class="row joined">
-          <input class="grow" type="number" id="density" inputmode="decimal" min="1" step="1" value="40">
-          <div class="suffix" data-t="unTreesAc">棵/英亩</div>
-        </div>
-      </div>
-
       <div class="field critical-field">
         <label class="lab" for="rate"><span data-t="labRate">DJI 喷洒量</span><span class="key-badge" data-t="keyInput">最重要</span></label>
         <div class="chips grow" id="rateUnitChips"></div>
@@ -453,9 +445,8 @@ zh:{
   labDrone:"无人机机型与药箱容量", custom:"自定",
   labCustomTank:"自定药箱容量",
   labTank:"药箱容量", hintTank:"以你实际装的量为准，不必装满。",
-  labAreaUnit:"面积按什么算", uAc:"英亩", uHa:"公顷", uTree:"棵树",
-  labArea:"喷药面积", labAreaTree:"喷药树数",
-  labDensity:"每英亩树数", unTreesAc:"棵/英亩", unAcre:"英亩", unTree:"棵",
+  labAreaUnit:"DJI 映射面积单位", uAc:"英亩", uHa:"公顷",
+  labArea:"DJI 映射的喷药面积", unAcre:"英亩",
   labRate:"DJI 喷洒量",
   keyInput:"最重要",
   hintRate:"从 DJI 遥控器的「任务设置 → 喷洒量」抄录。建议用清水试飞核对。",
@@ -515,9 +506,8 @@ en:{
   labDrone:"Drone model and tank capacity", custom:"Custom",
   labCustomTank:"Custom tank capacity",
   labTank:"Spray tank", hintTank:"Use what you actually load, not the rated maximum.",
-  labAreaUnit:"Measure the block by", uAc:"Acres", uHa:"Hectares", uTree:"Trees",
-  labArea:"Area to spray", labAreaTree:"Trees to spray",
-  labDensity:"Trees per acre", unTreesAc:"trees/acre", unAcre:"acre", unTree:"trees",
+  labAreaUnit:"DJI mapped area unit", uAc:"Acres", uHa:"Hectares",
+  labArea:"DJI mapped spray area", unAcre:"acre",
   labRate:"DJI application rate",
   keyInput:"Most important",
   hintRate:"Copy this from Task Settings → Application Rate on the DJI controller. Verify it with a water-only flight.",
@@ -577,9 +567,8 @@ ms:{
   labDrone:"Model dron dan isipadu tangki", custom:"Sendiri",
   labCustomTank:"Isipadu tangki sendiri",
   labTank:"Tangki racun", hintTank:"Guna jumlah yang anda betul-betul isi, bukan muatan maksimum.",
-  labAreaUnit:"Ukur kawasan ikut", uAc:"Ekar", uHa:"Hektar", uTree:"Pokok",
-  labArea:"Luas kawasan", labAreaTree:"Bilangan pokok",
-  labDensity:"Pokok se-ekar", unTreesAc:"pokok/ekar", unAcre:"ekar", unTree:"pokok",
+  labAreaUnit:"Unit keluasan dipetakan DJI", uAc:"Ekar", uHa:"Hektar",
+  labArea:"Keluasan semburan dipetakan DJI", unAcre:"ekar",
   labRate:"Kadar aplikasi DJI",
   keyInput:"Paling penting",
   hintRate:"Salin daripada Tetapan Tugas → Kadar Aplikasi pada alat kawalan DJI. Sahkan dengan penerbangan air bersih.",
@@ -640,7 +629,7 @@ var KEY="dronedose.v1";
 var DEFAULT={
   lang:null, size:0,
   model:"T50", tank:40,
-  areaUnit:"ac", area:5, density:40,
+  areaUnit:"ac", area:5,
   rate:20, rateUnit:"ac", calUnit:"ac", conv:800, split:"even",
   profile:{name:"",droplet:"",speed:"",height:"",spacing:""},
   products:[{name:"",basis:"area",unit:"ml",dose:"",labelTank:16,ratio:""}]
@@ -654,6 +643,10 @@ function load(){
     var o=JSON.parse(raw), d=clone(DEFAULT), k;
     for(k in d){ if(Object.prototype.hasOwnProperty.call(o,k)) d[k]=o[k]; }
     if(!Array.isArray(d.products)||!d.products.length) d.products=clone(DEFAULT.products);
+    if(d.areaUnit!=="ac"&&d.areaUnit!=="ha"){
+      d.areaUnit="ac";
+      d.area=DEFAULT.area; /* old tree-count values cannot safely become mapped acres */
+    }
     return d;
   }catch(e){ return clone(DEFAULT); }
 }
@@ -691,8 +684,7 @@ function compute(){
 
   var acres;
   if(S.areaUnit==="ac") acres=num(S.area);
-  else if(S.areaUnit==="ha") acres=num(S.area)*2.471054;
-  else acres=num(S.density)>0 ? num(S.area)/num(S.density) : 0;
+  else acres=num(S.area)*2.471054;
 
   if(acres<=0) r.errors.push(t("errArea"));
   if(rate<=0)  r.errors.push(t("errRate"));
@@ -789,9 +781,8 @@ function renderChrome(){
     k=nodes[i].getAttribute("data-t");
     if(t(k)!==undefined) nodes[i].textContent=t(k);
   }
-  $("areaLab").textContent = S.areaUnit==="tree"? t("labAreaTree") : t("labArea");
-  $("areaSuffix").textContent = S.areaUnit==="ac"?t("unAcre"):(S.areaUnit==="ha"?t("uHa"):t("unTree"));
-  $("densityField").classList.toggle("hidden", S.areaUnit!=="tree");
+  $("areaLab").textContent=t("labArea");
+  $("areaSuffix").textContent=S.areaUnit==="ac"?t("unAcre"):t("uHa");
 
   /* reference blocks */
   var why=t("why"), h="", i2;
@@ -867,8 +858,7 @@ function renderCalUnits(){
 function splitOptions(){
   var acres;
   if(S.areaUnit==="ac") acres=num(S.area);
-  else if(S.areaUnit==="ha") acres=num(S.area)*2.471054;
-  else acres=num(S.density)>0 ? num(S.area)/num(S.density) : 0;
+  else acres=num(S.area)*2.471054;
 
   var tank=num(S.tank), rate=num(S.rate), total=acres*rate;
   var even=t("splitEven"), full=t("splitFull");
@@ -907,7 +897,7 @@ function renderInputs(){
   renderModelSummary();
 
   chipRow($("areaUnitChips"),[
-    {label:t("uAc"),value:"ac"},{label:t("uHa"),value:"ha"},{label:t("uTree"),value:"tree"}
+    {label:t("uAc"),value:"ac"},{label:t("uHa"),value:"ha"}
   ],S.areaUnit,function(v){ S.areaUnit=v; save(); renderChrome(); renderInputs(); renderResult(); });
 
   renderRateUnits();
@@ -915,7 +905,7 @@ function renderInputs(){
 
   renderSplitChips();
 
-  setVal("tank",S.tank); setVal("area",S.area); setVal("density",S.density);
+  setVal("tank",S.tank); setVal("area",S.area);
   setVal("rate",fmt(displayRate())); setVal("conv",S.conv);
   var profile=S.profile||DEFAULT.profile;
   setVal("profileName",profile.name); setVal("droplet",profile.droplet);
@@ -1134,11 +1124,11 @@ function bindNum(id,key){
   $(id).addEventListener("input",function(){
     S[key]=$(id).value;
     if(key==="rate"||key==="tank") refreshChips();
-    else if(key==="area"||key==="density") renderSplitChips();
+    else if(key==="area") renderSplitChips();
     save(); renderResult();
   });
 }
-bindNum("tank","tank"); bindNum("area","area"); bindNum("density","density");
+bindNum("tank","tank"); bindNum("area","area");
 bindNum("conv","conv");
 $("rate").addEventListener("input",function(){
   S.rate=rateFromDisplay($("rate").value); save(); renderSplitChips(); renderResult();

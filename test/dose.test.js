@@ -47,7 +47,7 @@ function group(name) { console.log('\n' + name); }
 
 /* Baseline: T50 (40 L), 5 acres at 20 L/acre, 500 mL/acre of one product. */
 const base = {
-  model: "T50", tank: 40, areaUnit: "ac", area: 5, density: 40,
+  model: "T50", tank: 40, areaUnit: "ac", area: 5,
   rate: 20, conv: 800, split: "even",
   products: [{ name: "Metalaxyl", basis: "area", unit: "ml", dose: "500", labelTank: 16, ratio: "" }]
 };
@@ -101,8 +101,6 @@ check('ratio products are liquid', r.totals[0].liquid, true);
 group('6. Area unit conversions');
 S2({ areaUnit: "ha", area: 2 }); r = compute();
 check('2 ha to acres', r.acres, 4.942108, 1e-6);
-S2({ areaUnit: "tree", area: 200, density: 40 }); r = compute();
-check('200 trees at 40/acre', r.acres, 5, 1e-9);
 
 group('7. Solids');
 S2({ products: [{ name: "WP", basis: "area", unit: "g", dose: "300", labelTank: 16, ratio: "" }] });
