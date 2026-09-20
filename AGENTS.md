@@ -32,7 +32,7 @@ node test/dose.test.js
 ```
 
 No dependencies. It extracts the calculation core from `index.html` and runs
-44 checks. It must pass. If you change the banner comments
+47 checks. It must pass. If you change the banner comments
 `/* ===================== number helpers` or `/* ===================== rendering`,
 update the markers at the top of the test.
 

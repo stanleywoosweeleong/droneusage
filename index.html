@@ -140,6 +140,11 @@ input.bad{border-color:var(--red);background:var(--red-soft)}
 }
 .prod-top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .prod-top .grow{flex:1}
+.recipe-row{border:1px solid var(--line);border-radius:var(--radius);padding:10px;margin-top:8px;background:#fff}
+.recipe-name{font-weight:800}
+.recipe-meta{font-size:.86em;color:var(--ink-soft);margin:3px 0 8px}
+.recipe-actions{display:flex;gap:8px}
+.recipe-actions .btn{margin:0;padding:9px 12px;flex:1}
 .icon-btn{
   flex:0 0 auto;width:44px;height:44px;
   border:2px solid var(--line-strong);border-radius:var(--radius);
@@ -365,6 +370,19 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
         <p class="hint" id="convHint" data-t="hintConv">用实际常规喷雾量，把标签每桶用量换算成每英亩药量。</p>
       </div>
       <button class="btn" id="addProd" data-t="btnAdd">+ 添加药剂</button>
+      <details class="model-picker" id="recipeTool" style="margin-top:12px">
+        <summary data-t="detRecipes">保存的配方</summary>
+        <div class="model-picker-body">
+          <p class="hint" data-t="recipeHint">只有按下保存才会永久保留在这台设备。</p>
+          <div class="field">
+            <label class="lab" for="recipeName" data-t="recipeName">配方名称</label>
+            <input type="text" id="recipeName">
+          </div>
+          <button class="btn" id="saveRecipe" data-t="saveRecipe">保存配方到此设备</button>
+          <div id="recipeMsg"></div>
+          <div id="recipeList"></div>
+        </div>
+      </details>
       <div class="field load-choice">
         <label class="lab" data-t="labSplit">分箱方式</label>
         <p class="hint" data-t="hintSplit">最后决定每箱装同样多，还是先装满、最后一箱装余量。</p>
@@ -456,11 +474,11 @@ zh:{
   labSplit:"药箱怎样分装", hintSplit:"选择平均分装，或先装满药箱、最后一箱装余量。", splitEven:"平均分装", splitFull:"先装满箱",
   secProducts:"药剂", secProductsNote:"一次最多 4 种。混配前请先确认药剂之间可以混用。",
   prodName:"药剂名称", unnamed:"药剂",
-  basisArea:"每英亩", basisTank:"标签每桶", basisRatio:"地面稀释",
-  basisHelpArea:"标签例子：每英亩 500 mL。直接填写标签规定的每英亩用量。",
+  basisArea:"按面积", basisTank:"标签每桶", basisRatio:"地面稀释",
+  basisHelpArea:"直接填写标签规定的每英亩或每公顷用量。",
   basisHelpTank:"标签例子：每 16 L 水加 20 mL。本软件会先换算成每英亩用量。",
   basisHelpRatio:"",
-  doseArea:"每英亩用量", doseTank:"标签用量", doseRatio:"地面标签：1 份药剂配",
+  doseArea:"标签用量", doseTank:"标签用量", doseRatio:"地面标签：1 份药剂配",
   perTank:"每", water:"L 水", btnAdd:"+ 添加药剂",
   secResult:"配药单", secResultNote:"按这个装每一箱",
   loads:"箱", perLoad:"每箱", loadN:"第 {n} 箱",
@@ -470,6 +488,7 @@ zh:{
   errArea:"请填写喷药面积。", errRate:"请填写每英亩喷液量。", errTank:"请填写药箱容量。",
   errConv:"有药剂按「标签每桶」或「稀释比例」输入，请先填写常规喷雾用水量。",
   errDose:"请填写「{name}」的用量。",
+  errTankOverflow:"液体药剂体积已达到或超过总喷液量，无法加入清水。请核对药量、面积单位和 DJI 喷洒量。",
   concTitle:"药液浓度",
   concLine:"{name}：每 L 药液 {perL}（{pct}%）",
   multTitle:"比常规喷雾浓 {x} 倍",
@@ -487,6 +506,10 @@ zh:{
   calResult:"实测喷洒量：{v}", calUse:"采用实测值",
   detProfile:"DJI 作业参数（选填）", profileHint:"本次浏览期间保留这些作业参数；不会改变药剂用量。",
   profileName:"作业名称", droplet:"雾滴大小", speed:"飞行速度", height:"离作物高度", spacing:"航线间距",
+  detRecipes:"保存的配方", recipeHint:"普通输入只保留本次浏览。只有按下保存，配方才会永久保留在这台设备。",
+  recipeName:"配方名称", saveRecipe:"保存配方到此设备", recipeSaved:"配方已保存。", recipeNeedName:"请先填写配方名称。",
+  recipeIncomplete:"请先填写 DJI 喷洒量和至少一种完整的药剂用量。", noRecipes:"尚未保存配方。", loadRecipe:"载入", deleteRecipe:"删除",
+  recipeLoaded:"已载入「{name}」。请在使用前重新核对产品标签。", confirmDeleteRecipe:"删除配方「{name}」？", savedOn:"保存于 {date}",
   detWhy:"为什么不能照搬桶装浓度",
   why:["农药标签上的「每 16 L 水加 20 mL」，是给背包桶或过山泵写的。那种喷法一英亩要用几百升水。",
        "无人机一英亩只喷十几二十升。如果照标签的浓度配，一英亩下去的药量只有常规的几十分之一，等于白喷。",
@@ -520,11 +543,11 @@ en:{
   labSplit:"How to fill the tanks", hintSplit:"Choose balanced loads, or fill tanks first and put the remainder in the last load.", splitEven:"Balance evenly", splitFull:"Fill tanks first",
   secProducts:"Products", secProductsNote:"Up to 4 at a time. Confirm the products are compatible before tank-mixing.",
   prodName:"Product name", unnamed:"Product",
-  basisArea:"Per acre", basisTank:"Label per tank", basisRatio:"Ground dilution",
-  basisHelpArea:"Label example: 500 mL per acre. Enter the label's per-acre rate directly.",
+  basisArea:"Rate by area", basisTank:"Label per tank", basisRatio:"Ground dilution",
+  basisHelpArea:"Enter the label rate per acre or per hectare directly.",
   basisHelpTank:"Label example: 20 mL per 16 L water. The app first converts this to a per-acre rate.",
   basisHelpRatio:"",
-  doseArea:"Rate per acre", doseTank:"Label dose", doseRatio:"Ground label: 1 part product to",
+  doseArea:"Label product rate", doseTank:"Label dose", doseRatio:"Ground label: 1 part product to",
   perTank:"per", water:"L water", btnAdd:"+ Add product",
   secResult:"Mixing sheet", secResultNote:"Load every tank like this",
   loads:"loads", perLoad:"per load", loadN:"Load {n}",
@@ -534,6 +557,7 @@ en:{
   errArea:"Enter the area to spray.", errRate:"Enter the spray volume per acre.", errTank:"Enter the tank volume.",
   errConv:"A product is entered per label tank or as a ratio — fill in the conventional spray water volume first.",
   errDose:"Enter a dose for \u201c{name}\u201d.",
+  errTankOverflow:"Liquid products equal or exceed the total spray volume, leaving no room for water. Check the dose, area unit and DJI application rate.",
   concTitle:"Tank concentration",
   concLine:"{name}: {perL} per L of mix ({pct}%)",
   multTitle:"{x}× stronger than a conventional spray",
@@ -551,6 +575,10 @@ en:{
   calResult:"Measured application rate: {v}", calUse:"Use measured value",
   detProfile:"DJI operation settings (optional)", profileHint:"Keep these job settings for this browser session. They do not change the product dose.",
   profileName:"Operation name", droplet:"Droplet size", speed:"Flight speed", height:"Height above crops", spacing:"Route spacing",
+  detRecipes:"Saved recipes", recipeHint:"Normal inputs last only for this browser session. A recipe remains on this device only when you explicitly save it.",
+  recipeName:"Recipe name", saveRecipe:"Save recipe to this device", recipeSaved:"Recipe saved.", recipeNeedName:"Enter a recipe name first.",
+  recipeIncomplete:"Enter the DJI application rate and at least one complete product dose first.", noRecipes:"No saved recipes yet.", loadRecipe:"Load", deleteRecipe:"Delete",
+  recipeLoaded:"Loaded \u201c{name}\u201d. Recheck every product label before use.", confirmDeleteRecipe:"Delete recipe \u201c{name}\u201d?", savedOn:"Saved {date}",
   detWhy:"Why a knapsack dilution cannot be copied across",
   why:["\u201c20 mL per 16 L of water\u201d on a label is written for a knapsack or a power pump. That way of spraying puts hundreds of litres on an acre.",
        "A drone puts a dozen or two litres on the same acre. Mix to the label concentration and the acre receives a small fraction of the intended dose — the spray is wasted.",
@@ -584,11 +612,11 @@ ms:{
   labSplit:"Cara mengisi tangki", hintSplit:"Pilih muatan seimbang, atau isi tangki penuh dahulu dan letakkan baki dalam muatan terakhir.", splitEven:"Bahagi sama rata", splitFull:"Isi penuh dahulu",
   secProducts:"Racun", secProductsNote:"Maksimum 4 pada satu masa. Pastikan racun boleh dicampur sebelum mencampurnya.",
   prodName:"Nama racun", unnamed:"Racun",
-  basisArea:"Se-ekar", basisTank:"Label setangki", basisRatio:"Pencairan darat",
-  basisHelpArea:"Contoh label: 500 mL se-ekar. Masukkan kadar se-ekar pada label secara terus.",
+  basisArea:"Kadar ikut luas", basisTank:"Label setangki", basisRatio:"Pencairan darat",
+  basisHelpArea:"Masukkan kadar label se-ekar atau sehektar secara terus.",
   basisHelpTank:"Contoh label: 20 mL bagi 16 L air. Perisian menukarnya dahulu kepada kadar se-ekar.",
   basisHelpRatio:"",
-  doseArea:"Kadar se-ekar", doseTank:"Dos label", doseRatio:"Label darat: 1 bahagian racun kepada",
+  doseArea:"Kadar racun pada label", doseTank:"Dos label", doseRatio:"Label darat: 1 bahagian racun kepada",
   perTank:"per", water:"L air", btnAdd:"+ Tambah racun",
   secResult:"Senarai campuran", secResultNote:"Isi setiap tangki begini",
   loads:"muatan", perLoad:"per muatan", loadN:"Muatan {n}",
@@ -598,6 +626,7 @@ ms:{
   errArea:"Masukkan luas kawasan.", errRate:"Masukkan isipadu semburan se-ekar.", errTank:"Masukkan isipadu tangki.",
   errConv:"Ada racun yang dimasukkan ikut label setangki atau nisbah — isi dahulu isipadu air semburan biasa.",
   errDose:"Masukkan dos untuk \u201c{name}\u201d.",
+  errTankOverflow:"Isipadu racun cecair menyamai atau melebihi jumlah semburan, jadi tiada ruang untuk air. Semak dos, unit luas dan kadar aplikasi DJI.",
   concTitle:"Kepekatan dalam tangki",
   concLine:"{name}: {perL} setiap L campuran ({pct}%)",
   multTitle:"{x} kali lebih pekat daripada semburan biasa",
@@ -615,6 +644,10 @@ ms:{
   calResult:"Kadar aplikasi diukur: {v}", calUse:"Guna nilai diukur",
   detProfile:"Tetapan operasi DJI (pilihan)", profileHint:"Kekalkan tetapan kerja ini untuk sesi pelayar semasa. Tetapan ini tidak mengubah dos racun.",
   profileName:"Nama operasi", droplet:"Saiz titisan", speed:"Kelajuan penerbangan", height:"Ketinggian atas tanaman", spacing:"Jarak laluan",
+  detRecipes:"Resipi disimpan", recipeHint:"Input biasa hanya kekal untuk sesi pelayar ini. Resipi kekal pada peranti ini hanya apabila anda menyimpannya.",
+  recipeName:"Nama resipi", saveRecipe:"Simpan resipi pada peranti ini", recipeSaved:"Resipi disimpan.", recipeNeedName:"Masukkan nama resipi dahulu.",
+  recipeIncomplete:"Masukkan kadar aplikasi DJI dan sekurang-kurangnya satu dos racun lengkap dahulu.", noRecipes:"Belum ada resipi disimpan.", loadRecipe:"Muat", deleteRecipe:"Padam",
+  recipeLoaded:"\u201c{name}\u201d telah dimuat. Semak semula setiap label racun sebelum digunakan.", confirmDeleteRecipe:"Padam resipi \u201c{name}\u201d?", savedOn:"Disimpan {date}",
   detWhy:"Mengapa pencairan pam sandang tidak boleh disalin terus",
   why:["\u201c20 mL setiap 16 L air\u201d pada label ditulis untuk pam sandang atau pam tekanan tinggi. Cara itu menggunakan beratus liter se-ekar.",
        "Dron hanya menyembur belasan hingga dua puluh liter se-ekar. Jika dicampur mengikut kepekatan label, ekar itu hanya menerima sepersekian daripada dos sebenar — semburan itu sia-sia.",
@@ -636,13 +669,14 @@ ms:{
 var LEGACY_KEY="dronedose.v1";
 var PREF_KEY="dronedose.prefs.v1";
 var SESSION_KEY="dronedose.session.v1";
+var RECIPE_KEY="dronedose.recipes.v1";
 var DEFAULT={
   lang:null, size:0,
   model:"T50", tank:40,
   areaUnit:"ac", area:"",
-  rate:"", rateUnit:"ac", calUnit:"ac", conv:"", split:"even",
+  rate:"", rateUnit:"ac", calUnit:"ac", conv:"", split:"even", recipeName:"",
   profile:{name:"",droplet:"",speed:"",height:"",spacing:""},
-  products:[{name:"",basis:"area",unit:"ml",dose:"",labelTank:"",ratio:""}]
+  products:[{name:"",basis:"area",unit:"ml",dose:"",doseAreaUnit:"ac",labelTank:"",ratio:""}]
 };
 var S=load();
 
@@ -661,6 +695,7 @@ function load(){
     ["lang","size","model"].forEach(function(key){ if(Object.prototype.hasOwnProperty.call(prefs,key)) d[key]=prefs[key]; });
     if(!raw) d.tank=modelTank(d.model);
     if(!Array.isArray(d.products)||!d.products.length) d.products=clone(DEFAULT.products);
+    d.products.forEach(function(p){ if(p.doseAreaUnit!=="ha") p.doseAreaUnit="ac"; });
     if(d.areaUnit!=="ac"&&d.areaUnit!=="ha"){
       d.areaUnit="ac";
       d.area=DEFAULT.area; /* old tree-count values cannot safely become mapped acres */
@@ -722,7 +757,7 @@ function compute(){
     perAcre=0;
     if(p.basis==="area"){
       base=num(p.dose)*TO_BASE[p.unit];
-      perAcre=base;
+      perAcre=p.doseAreaUnit==="ha"?base*HA_PER_ACRE:base;
     }else if(p.basis==="tank"){
       needConv=true;
       base=num(p.dose)*TO_BASE[p.unit];
@@ -747,7 +782,11 @@ function compute(){
   if(!items.length) r.errors.push(null); /* silent: nothing entered yet */
 
   r.errors=r.errors.filter(function(x){return !!x;});
-  if(acres<=0||rate<=0||tank<=0||!items.length) return r;
+  if(r.errors.length||acres<=0||rate<=0||tank<=0||!items.length) return r;
+
+  var liquidPerAcre=0;
+  items.forEach(function(it){ if(it.liquid) liquidPerAcre+=it.perAcre/1000; });
+  if(liquidPerAcre>=rate){ r.errors.push(t("errTankOverflow")); return r; }
 
   var total=acres*rate;
   var n=Math.max(1,Math.ceil(total/tank - 1e-9));
@@ -933,11 +972,13 @@ function renderInputs(){
 
   setVal("tank",S.tank); setVal("area",S.area);
   setVal("rate",displayRateText()); setVal("conv",S.conv);
+  setVal("recipeName",S.recipeName||"");
   var profile=S.profile||DEFAULT.profile;
   setVal("profileName",profile.name); setVal("droplet",profile.droplet);
   setVal("speed",profile.speed); setVal("height",profile.height); setVal("spacing",profile.spacing);
 
   renderProducts();
+  renderRecipes();
 }
 
 function renderProducts(){
@@ -996,9 +1037,6 @@ function renderProducts(){
       inp.min="0"; inp.step="0.1"; inp.value=p.dose;
       inp.addEventListener("input",function(){ p.dose=inp.value; save(); renderResult(); });
       row.appendChild(inp);
-      var sfx=document.createElement("div"); sfx.className="suffix";
-      sfx.textContent = p.basis==="area" ? ("/ "+t("unAcre")) : "";
-      if(p.basis==="area") row.appendChild(sfx);
       f.appendChild(row);
 
       var uChips=document.createElement("div"); uChips.className="chips grow";
@@ -1008,6 +1046,15 @@ function renderProducts(){
         {label:"g",value:"g"},{label:"kg",value:"kg"}
       ],p.unit,function(v){ p.unit=v; save(); renderProducts(); renderResult(); });
       f.appendChild(uChips);
+
+      if(p.basis==="area"){
+        var areaChips=document.createElement("div"); areaChips.className="chips grow";
+        areaChips.style.marginTop="6px";
+        chipRow(areaChips,[
+          {label:"/ "+t("unAcre"),value:"ac"},{label:"/ "+t("uHa"),value:"ha"}
+        ],p.doseAreaUnit||"ac",function(v){ p.doseAreaUnit=v; save(); renderProducts(); renderResult(); });
+        f.appendChild(areaChips);
+      }
       d.appendChild(f);
 
       if(p.basis==="tank"){
@@ -1038,6 +1085,57 @@ function renderConversionPreviews(){
       el.classList.add("hidden");
     }
   }
+}
+
+function getRecipes(){
+  try{
+    var x=JSON.parse(localStorage.getItem(RECIPE_KEY)||"[]");
+    return Array.isArray(x)?x:[];
+  }catch(e){ return []; }
+}
+function putRecipes(x){ try{ localStorage.setItem(RECIPE_KEY,JSON.stringify(x)); }catch(e){} }
+function productComplete(p){
+  if(p.basis==="ratio") return num(p.ratio)>0&&num(S.conv)>0;
+  if(p.basis==="tank") return num(p.dose)>0&&num(p.labelTank)>0&&num(S.conv)>0;
+  return num(p.dose)>0;
+}
+function recipeData(){
+  return {
+    model:S.model,tank:S.tank,rate:S.rate,rateUnit:S.rateUnit,conv:S.conv,split:S.split,
+    profile:clone(S.profile||DEFAULT.profile),products:clone(S.products)
+  };
+}
+function renderRecipes(){
+  var list=$("recipeList"), recipes=getRecipes();
+  list.innerHTML="";
+  if(!recipes.length){ var empty=document.createElement("p"); empty.className="hint"; empty.textContent=t("noRecipes"); list.appendChild(empty); return; }
+  recipes.forEach(function(r){
+    var row=document.createElement("div"); row.className="recipe-row";
+    var name=document.createElement("div"); name.className="recipe-name"; name.textContent=r.name; row.appendChild(name);
+    var meta=document.createElement("div"); meta.className="recipe-meta";
+    var date=new Date(r.savedAt); meta.textContent=fill(t("savedOn"),{date:isNaN(date.getTime())?"":date.toLocaleDateString()}); row.appendChild(meta);
+    var actions=document.createElement("div"); actions.className="recipe-actions";
+    var loadBtn=document.createElement("button"); loadBtn.type="button"; loadBtn.className="btn"; loadBtn.textContent=t("loadRecipe");
+    loadBtn.addEventListener("click",function(){ loadRecipe(r); }); actions.appendChild(loadBtn);
+    var delBtn=document.createElement("button"); delBtn.type="button"; delBtn.className="btn"; delBtn.textContent=t("deleteRecipe");
+    delBtn.addEventListener("click",function(){
+      if(!window.confirm(fill(t("confirmDeleteRecipe"),{name:r.name}))) return;
+      putRecipes(getRecipes().filter(function(x){ return x.id!==r.id; })); renderRecipes();
+    }); actions.appendChild(delBtn);
+    row.appendChild(actions); list.appendChild(row);
+  });
+}
+function loadRecipe(r){
+  var keepArea=S.area, keepAreaUnit=S.areaUnit;
+  S.model=r.data.model||DEFAULT.model;
+  S.tank=r.data.tank!==undefined?r.data.tank:modelTank(S.model);
+  S.rate=r.data.rate||""; S.rateUnit=r.data.rateUnit||"ac"; S.conv=r.data.conv||""; S.split=r.data.split||"even";
+  S.profile=clone(r.data.profile||DEFAULT.profile);
+  S.products=clone(Array.isArray(r.data.products)&&r.data.products.length?r.data.products:DEFAULT.products);
+  S.products.forEach(function(p){ if(p.doseAreaUnit!=="ha") p.doseAreaUnit="ac"; });
+  S.area=keepArea; S.areaUnit=keepAreaUnit; S.recipeName=r.name;
+  save(); renderChrome(); renderInputs(); renderResult();
+  $("recipeMsg").innerHTML='<div class="note amber">'+esc(fill(t("recipeLoaded"),{name:r.name}))+'</div>';
 }
 
 function numField(labelText,value,suffixText,onInput){
@@ -1200,8 +1298,24 @@ $("rate").addEventListener("input",function(){
 
 $("addProd").addEventListener("click",function(){
   if(S.products.length>=4) return;
-  S.products.push({name:"",basis:"area",unit:"ml",dose:"",labelTank:"",ratio:""});
+  S.products.push({name:"",basis:"area",unit:"ml",dose:"",doseAreaUnit:"ac",labelTank:"",ratio:""});
   save(); renderProducts(); renderResult();
+});
+
+$("recipeName").addEventListener("input",function(){ S.recipeName=$("recipeName").value; save(); });
+$("saveRecipe").addEventListener("click",function(){
+  var name=(S.recipeName||"").trim(), msg=$("recipeMsg");
+  if(!name){ msg.innerHTML='<div class="note red">'+esc(t("recipeNeedName"))+'</div>'; return; }
+  var complete=S.products.filter(productComplete);
+  var incompleteNamed=S.products.some(function(p){ return (p.name||"").trim()&&!productComplete(p); });
+  if(num(S.rate)<=0||num(S.tank)<=0||!complete.length||incompleteNamed){
+    msg.innerHTML='<div class="note red">'+esc(t("recipeIncomplete"))+'</div>'; return;
+  }
+  var recipes=getRecipes(), match=null;
+  for(var i=0;i<recipes.length;i++) if(recipes[i].name.toLowerCase()===name.toLowerCase()) match=recipes[i];
+  var record={id:match?match.id:String(Date.now()),name:name,savedAt:new Date().toISOString(),data:recipeData()};
+  recipes=recipes.filter(function(x){ return x.id!==record.id; }); recipes.unshift(record); putRecipes(recipes);
+  msg.innerHTML='<div class="note green">'+esc(t("recipeSaved"))+'</div>'; renderRecipes();
 });
 
 $("langBtn").addEventListener("click",function(){

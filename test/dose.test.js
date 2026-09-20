@@ -28,7 +28,7 @@ const core = src.slice(src.indexOf(START), src.indexOf(END));
 const prelude = `
 var S = null;
 function t(k){ return {errArea:"ERR_AREA",errRate:"ERR_RATE",errTank:"ERR_TANK",
-  errConv:"ERR_CONV",errDose:"ERR_DOSE {name}",prodName:"Product",unnamed:"Product",
+  errConv:"ERR_CONV",errDose:"ERR_DOSE {name}",errTankOverflow:"ERR_TANK_OVERFLOW",prodName:"Product",unnamed:"Product",
   warnHighConc:"HIGH_CONC",warnRatioConversion:"RATIO_CONVERSION",warnVolume:"VOL {p}",warnPartial:"PARTIAL {v}"}[k] || k; }
 function fill(s,o){ var k; for(k in o){ s=s.split("{"+k+"}").join(o[k]); } return s; }
 `;
@@ -49,7 +49,7 @@ function group(name) { console.log('\n' + name); }
 const base = {
   model: "T50", tank: 40, areaUnit: "ac", area: 5,
   rate: 20, conv: 800, split: "even",
-  products: [{ name: "Metalaxyl", basis: "area", unit: "ml", dose: "500", labelTank: 16, ratio: "" }]
+  products: [{ name: "Metalaxyl", basis: "area", unit: "ml", dose: "500", doseAreaUnit: "ac", labelTank: 16, ratio: "" }]
 };
 const S2 = (o) => setS(Object.assign(JSON.parse(JSON.stringify(base)), o));
 let r;
@@ -102,6 +102,8 @@ check('ratio conversion warning is shown', r.warnings.some(w => w.text === 'RATI
 group('6. Area unit conversions');
 S2({ areaUnit: "ha", area: 2 }); r = compute();
 check('2 ha to acres', r.acres, 4.942108, 1e-6);
+S2({ products: [{ name: "Per hectare", basis: "area", unit: "ml", dose: "500", doseAreaUnit: "ha", labelTank: 16, ratio: "" }] }); r = compute();
+check('500 mL/ha converts to mL/acre', r.totals[0].perL * r.rate, 500 * 0.404685642, 1e-6);
 
 group('7. Solids');
 S2({ products: [{ name: "WP", basis: "area", unit: "g", dose: "300", labelTank: 16, ratio: "" }] });
@@ -119,6 +121,10 @@ check('label basis without conventional volume is flagged',
   compute().errors.includes("ERR_CONV"), true);
 S2({ products: [{ name: "", basis: "area", unit: "ml", dose: "", labelTank: 16, ratio: "" }] });
 check('untouched product raises no noise', compute().errors.length, 0);
+S2({ rate: 1, products: [{ name: "Impossible", basis: "area", unit: "ml", dose: "1000", doseAreaUnit: "ac", labelTank: 16, ratio: "" }] });
+r = compute();
+check('liquid product equal to spray volume is blocked', r.ok, false);
+check('impossible mixture has a stated error', r.errors.includes('ERR_TANK_OVERFLOW'), true);
 
 group('9. Safety warnings');
 S2({ rate: 6, products: [{ name: "Strong", basis: "area", unit: "ml", dose: "5000", labelTank: 16, ratio: "" }] });
