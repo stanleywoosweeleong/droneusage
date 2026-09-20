@@ -91,6 +91,10 @@ label.lab{display:block;font-size:.94em;font-weight:700;margin-bottom:7px}
 .key-badge{display:inline-block;margin-left:6px;padding:2px 6px;background:var(--blue);color:#fff;font-size:.72em;font-weight:800;vertical-align:2px}
 .basis-help{margin:7px 0 0;padding:8px 10px;background:var(--blue-soft);border-left:4px solid var(--blue);color:#0A2E45;font-size:.82em;font-weight:600;line-height:1.4}
 .load-choice{border-top:2px solid var(--line);padding-top:14px;margin-top:14px}
+.model-picker.model-picker{border:2px solid var(--line-strong);border-radius:var(--radius);background:#fff}
+.model-picker summary{padding:11px 12px;font-size:1.02em;background:#F2F5F8}
+.model-picker summary::after{color:var(--ink)}
+.model-picker-body{padding:12px;border-top:1px solid var(--line)}
 
 /* ---------- controls ---------- */
 input[type=number],input[type=text]{
@@ -269,7 +273,10 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
 
       <div class="field">
         <label class="lab" data-t="labDrone">无人机机型</label>
-        <div class="chips" id="modelChips"></div>
+        <details class="model-picker" id="modelPicker">
+          <summary><span id="modelSummary">T50 · 40 L</span></summary>
+          <div class="model-picker-body"><div class="chips" id="modelChips"></div></div>
+        </details>
       </div>
 
       <div class="field hidden" id="tankField">
@@ -799,6 +806,11 @@ function setVal(id,v){
   if(el && document.activeElement!==el) el.value=v;
 }
 
+function renderModelSummary(){
+  var label=S.model==="custom"?t("custom"):S.model;
+  $("modelSummary").textContent=label+" · "+fmt(num(S.tank))+" L";
+}
+
 /* chips only — used while the user is typing, so live inputs are never rebuilt */
 function refreshChips(){
   var f=MODELS.filter(function(m){return m.id===S.model;})[0];
@@ -810,8 +822,9 @@ function refreshChips(){
     S.model=v;
     var g=MODELS.filter(function(m){return m.id===v;})[0];
     if(g){ S.tank=g.tank; $("tank").value=g.tank; }
-    save(); renderInputs(); renderResult();
+    save(); renderInputs(); renderResult(); $("modelPicker").open=false;
   });
+  renderModelSummary();
   chipRow($("rateChips"),[
     {label:t("rate1"),value:6},{label:t("rate2"),value:12},
     {label:t("rate3"),value:20},{label:t("rate4"),value:30}
@@ -857,8 +870,9 @@ function renderInputs(){
     S.model=v;
     var f=MODELS.filter(function(m){return m.id===v;})[0];
     if(f){ S.tank=f.tank; $("tank").value=f.tank; }
-    save(); renderInputs(); renderResult();
+    save(); renderInputs(); renderResult(); $("modelPicker").open=false;
   });
+  renderModelSummary();
 
   chipRow($("areaUnitChips"),[
     {label:t("uAc"),value:"ac"},{label:t("uHa"),value:"ha"},{label:t("uTree"),value:"tree"}
