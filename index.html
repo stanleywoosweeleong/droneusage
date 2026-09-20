@@ -260,7 +260,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
 <header>
   <div class="hgroup">
     <div class="htitle" id="appTitle">无人机配药</div>
-    <div class="hsub" id="appSub">以 DJI 机型为基准</div>
+    <div class="hsub" id="appSub">以大疆机型为基准</div>
   </div>
   <button class="hbtn" id="langBtn" aria-label="language">中文</button>
   <button class="hbtn" id="sizeBtn" aria-label="text size">Aa</button>
@@ -285,7 +285,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
       </div>
 
       <div class="field hidden" id="tankField">
-        <label class="lab" for="tank" data-t="labCustomTank">自定药箱容量</label>
+        <label class="lab" for="tank" data-t="labCustomTank">自定药桶容量</label>
         <div class="row joined">
           <input class="grow" type="number" id="tank" inputmode="decimal" min="0" step="0.5">
           <div class="suffix">L</div>
@@ -294,12 +294,12 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
       </div>
 
       <div class="field">
-        <label class="lab" data-t="labAreaUnit">面积按什么算</label>
+        <label class="lab" data-t="labAreaUnit">大疆测绘面积单位</label>
         <div class="chips grow" id="areaUnitChips"></div>
       </div>
 
       <div class="field">
-        <label class="lab" for="area" id="areaLab" data-t="labArea">喷药面积</label>
+        <label class="lab" for="area" id="areaLab" data-t="labArea">大疆测绘喷洒面积</label>
         <div class="row joined">
           <input class="grow" type="number" id="area" inputmode="decimal" min="0" step="0.1">
           <div class="suffix" id="areaSuffix">英亩</div>
@@ -307,13 +307,13 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
       </div>
 
       <div class="field critical-field">
-        <label class="lab" for="rate"><span data-t="labRate">DJI 喷洒量</span><span class="key-badge" data-t="keyInput">最重要</span></label>
+        <label class="lab" for="rate"><span data-t="labRate">大疆喷洒量</span><span class="key-badge" data-t="keyInput">最重要</span></label>
         <div class="chips grow" id="rateUnitChips"></div>
         <div class="row joined" style="margin-top:6px">
           <input class="grow" type="number" id="rate" inputmode="decimal" min="0" step="0.5">
           <div class="suffix" id="rateSuffix">L / 英亩</div>
         </div>
-        <p class="hint" data-t="hintRate">从 DJI 遥控器的「任务设置 → 喷洒量」抄录。建议用清水试飞核对。</p>
+        <p class="hint" data-t="hintRate">从大疆遥控器的「任务设置 → 喷洒量」抄录。建议用清水试飞核对。</p>
       </div>
 
       <div class="field">
@@ -338,7 +338,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
 
       <div class="field">
         <details class="model-picker" id="profileTool">
-          <summary data-t="detProfile">DJI 作业参数（选填）</summary>
+          <summary data-t="detProfile">大疆作业参数（选填）</summary>
           <div class="model-picker-body">
             <p class="hint" data-t="profileHint">保存本次设置，方便下次重复同一作业；不会改变药剂用量。</p>
             <div class="field"><label class="lab" for="profileName" data-t="profileName">作业名称</label><input type="text" id="profileName"></div>
@@ -385,7 +385,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
       </details>
       <div class="field load-choice">
         <label class="lab" data-t="labSplit">分箱方式</label>
-        <p class="hint" data-t="hintSplit">最后决定每箱装同样多，还是先装满、最后一箱装余量。</p>
+        <p class="hint" data-t="hintSplit">最后决定每桶装同样多，还是先装满、最后一桶装余量。</p>
         <div class="chips grow" id="splitChips"></div>
       </div>
     </div>
@@ -395,7 +395,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
   <section class="result" id="resultSec">
     <div class="sec-head">
       <h2 class="sec-title" data-t="secResult">配药单</h2>
-      <p class="sec-note" data-t="secResultNote">按这个装每一箱</p>
+      <p class="sec-note" data-t="secResultNote">每桶的配药量如下</p>
     </div>
     <div class="sec-body" id="resultBody" aria-live="polite"></div>
   </section>
@@ -410,7 +410,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
     </details>
 
     <details>
-      <summary data-t="detTable">DJI 机型药箱容量</summary>
+      <summary data-t="detTable">大疆机型药桶容量</summary>
       <div class="det-body">
         <table id="modelTable"></table>
         <p class="hint" id="tableNote" style="margin-top:10px"></p>
@@ -457,21 +457,21 @@ var MODELS = [
 /* ===================== i18n ===================== */
 var I18N = {
 zh:{
-  code:"中文", title:"无人机配药", sub:"以 DJI 机型为基准",
+  code:"中文", title:"无人机配药", sub:"以大疆机型为基准",
   secInputs:"喷药设定", secInputsNote:"计算所需的全部输入都在这里",
-  labDrone:"无人机机型与药箱容量", custom:"自定",
-  labCustomTank:"自定药箱容量",
-  labTank:"药箱容量", hintTank:"以你实际装的量为准，不必装满。",
-  labAreaUnit:"DJI 映射面积单位", uAc:"英亩", uHa:"公顷",
-  labArea:"DJI 映射的喷药面积", unAcre:"英亩",
-  labRate:"DJI 喷洒量",
+  labDrone:"无人机机型与药桶容量", custom:"自定",
+  labCustomTank:"自定药桶容量",
+  labTank:"药桶容量", hintTank:"以你实际装的量为准，不必装满。",
+  labAreaUnit:"大疆测绘面积单位", uAc:"英亩", uHa:"公顷",
+  labArea:"大疆测绘喷洒面积", unAcre:"英亩",
+  labRate:"大疆喷洒量",
   keyInput:"最重要",
-  hintRate:"从 DJI 遥控器的「任务设置 → 喷洒量」抄录。建议用清水试飞核对。",
+  hintRate:"从大疆遥控器的「任务设置 → 喷洒量」抄录。建议用清水试飞核对。",
   labConv:"地面喷雾量",
   hintConv:"用实际常规喷雾量，把标签每桶用量换算成每英亩药量。",
   hintConvRatio:"与地面稀释比例一起使用，算出每英亩实际药量。",
   convertedDose:"地面等效药量：{v}／英亩", partsSpray:"份喷液",
-  labSplit:"药箱怎样分装", hintSplit:"选择平均分装，或先装满药箱、最后一箱装余量。", splitEven:"平均分装", splitFull:"先装满箱",
+  labSplit:"药桶怎样分装", hintSplit:"选择平均分装，或先装满药桶、最后一桶装余量。", splitEven:"平均分装", splitFull:"先装满桶",
   secProducts:"药剂", secProductsNote:"一次最多 4 种。混配前请先确认药剂之间可以混用。",
   prodName:"药剂名称", unnamed:"药剂",
   basisArea:"按面积", basisTank:"标签每桶", basisRatio:"地面稀释",
@@ -480,15 +480,15 @@ zh:{
   basisHelpRatio:"",
   doseArea:"标签用量", doseTank:"标签用量", doseRatio:"地面标签：1 份药剂配",
   perTank:"每", water:"L 水", btnAdd:"+ 添加药剂",
-  secResult:"配药单", secResultNote:"按这个装每一箱",
-  loads:"箱", perLoad:"每箱", loadN:"第 {n} 箱",
+  secResult:"配药单", secResultNote:"每桶的配药量如下",
+  loads:"桶", perLoad:"每桶", loadN:"第 {n} 桶",
   clearWater:"清水", totalSpray:"总喷液量", totalNeed:"药剂总需求量",
   covers:"覆盖 {a} 英亩",
   emptyMsg:"填入面积、喷液量和至少一种药剂，配药单就会出现在这里。",
-  errArea:"请填写喷药面积。", errRate:"请填写每英亩喷液量。", errTank:"请填写药箱容量。",
+  errArea:"请填写喷药面积。", errRate:"请填写每英亩喷液量。", errTank:"请填写药桶容量。",
   errConv:"有药剂按「标签每桶」或「稀释比例」输入，请先填写常规喷雾用水量。",
   errDose:"请填写「{name}」的用量。",
-  errTankOverflow:"液体药剂体积已达到或超过总喷液量，无法加入清水。请核对药量、面积单位和 DJI 喷洒量。",
+  errTankOverflow:"液体药剂体积已达到或超过总喷液量，无法加入清水。请核对药量、面积单位和大疆喷洒量。",
   concTitle:"药液浓度",
   concLine:"{name}：每 L 药液 {perL}（{pct}%）",
   multTitle:"比常规喷雾浓 {x} 倍",
@@ -496,33 +496,33 @@ zh:{
   multLow:"你设定的喷液量与常规喷雾接近，浓度没有明显变化。",
   warnHighConc:"浓度较高（超过 5%）。请核对产品标签是否允许这个浓度，并先小范围试喷。",
   warnRatioConversion:"已把地面稀释比例换算为每英亩药量。只有产品允许无人机／航空施用，并允许换算后的浓度与最低用水量时才可使用。",
-  warnVolume:"药剂体积已占药箱 {p}%。请先用桶预混稀释，再倒入药箱，并注意过滤。",
-  warnPartial:"最后一箱只装 {v} L，浓度与前面几箱相同。",
-  tipMix:"先在药箱里放约一半清水，逐一加入并搅匀每种药剂，最后补水至刻度。",
+  warnVolume:"药剂体积已占药桶 {p}%。请先用桶预混稀释，再倒入药桶，并注意过滤。",
+  warnPartial:"最后一桶只装 {v} L，浓度与前面几桶相同。",
+  tipMix:"先在药桶里放约一半清水，逐一加入并搅匀每种药剂，最后补水至刻度。",
   btnCopy:"复制配药单", copied:"已复制",
   detCal:"清水试飞：核对实际喷洒量",
   calIntro:"使用正式作业设置装清水试飞，记录实际用水量和覆盖面积。",
   calL:"实际用水量", calA:"实际覆盖面积",
   calResult:"实测喷洒量：{v}", calUse:"采用实测值",
-  detProfile:"DJI 作业参数（选填）", profileHint:"本次浏览期间保留这些作业参数；不会改变药剂用量。",
+  detProfile:"大疆作业参数（选填）", profileHint:"本次浏览期间保留这些作业参数；不会改变药剂用量。",
   profileName:"作业名称", droplet:"雾滴大小", speed:"飞行速度", height:"离作物高度", spacing:"航线间距",
   detRecipes:"保存的配方", recipeHint:"普通输入只保留本次浏览。只有按下保存，配方才会永久保留在这台设备。",
   recipeName:"配方名称", saveRecipe:"保存配方到此设备", recipeSaved:"配方已保存。", recipeNeedName:"请先填写配方名称。",
-  recipeIncomplete:"请先填写 DJI 喷洒量和至少一种完整的药剂用量。", noRecipes:"尚未保存配方。", loadRecipe:"载入", deleteRecipe:"删除",
+  recipeIncomplete:"请先填写大疆喷洒量和至少一种完整的药剂用量。", noRecipes:"尚未保存配方。", loadRecipe:"载入", deleteRecipe:"删除",
   recipeLoaded:"已载入「{name}」。请在使用前重新核对产品标签。", confirmDeleteRecipe:"删除配方「{name}」？", savedOn:"保存于 {date}",
   detWhy:"为什么不能照搬桶装浓度",
   why:["农药标签上的「每 16 L 水加 20 mL」，是给背包桶或过山泵写的。那种喷法一英亩要用几百升水。",
        "无人机一英亩只喷十几二十升。如果照标签的浓度配，一英亩下去的药量只有常规的几十分之一，等于白喷。",
        "正确做法只有一个：先算出<b>每英亩要多少药</b>，再把这个量装进无人机那一点点水里。本软件的「标签每桶」模式就是替你做这个换算。",
        "所以「常规喷雾用水量」这一栏一定要填你自己真实的数字 —— 你以前用过山泵，一英亩实际打了多少水。"],
-  detTable:"DJI 机型药箱容量", thModel:"机型", thTank:"药箱容量",
-  tableNote:"喷洒药箱容量，撒肥料斗容量不在此列。资料核对于 2026 年 9 月。请以你自己那台机的实际容量为准。",
+  detTable:"大疆机型药桶容量", thModel:"机型", thTank:"药桶容量",
+  tableNote:"喷洒药桶容量，撒肥料斗容量不在此列。资料核对于 2026 年 9 月。请以你自己那台机的实际容量为准。",
   detMath:"计算方法",
   math:["总喷液量 ＝ 面积 × 每英亩喷液量",
-        "箱数 ＝ 总喷液量 ÷ 药箱容量（进位取整）",
+        "桶数 ＝ 总喷液量 ÷ 药桶容量（进位取整）",
         "每英亩药量 ＝ 标签用量 ÷ 标签水量 × 常规喷雾用水量（「标签每桶」模式）",
-        "每箱药量 ＝ 每英亩药量 × （每箱升数 ÷ 每英亩喷液量）",
-        "清水量 ＝ 每箱升数 － 液体药剂体积"],
+        "每桶药量 ＝ 每英亩药量 × （每桶升数 ÷ 每英亩喷液量）",
+        "清水量 ＝ 每桶升数 － 液体药剂体积"],
   detReset:"重设", btnReset:"清空全部输入", confirmReset:"确定清空全部输入？"
 },
 en:{
