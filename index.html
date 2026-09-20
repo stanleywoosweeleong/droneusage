@@ -436,22 +436,23 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
 "use strict";
 
 /* ===================== model data ===================== */
-/* Spray tank capacity (litres). Verified against DJI product pages and
-   published specifications, September 2026. Spreading-hopper volumes are
+/* Spray tank capacity (litres) and first-introduction year. Verified against
+   DJI product pages, announcements and published specifications, September
+   2026. Regional availability dates vary. Spreading-hopper volumes are
    deliberately excluded — this app only doses liquid. */
 var MODELS = [
-  {id:"T10",  tank:8},
-  {id:"T16",  tank:16},
-  {id:"T20",  tank:20},
-  {id:"T20P", tank:20},
-  {id:"T25",  tank:20},
-  {id:"T25P", tank:20},
-  {id:"T30",  tank:30},
-  {id:"T40",  tank:40},
-  {id:"T50",  tank:40},
-  {id:"T55",  tank:50},
-  {id:"T70P", tank:70},
-  {id:"T100", tank:100}
+  {id:"T10",  tank:8,   year:2020},
+  {id:"T16",  tank:16,  year:2018},
+  {id:"T20",  tank:20,  year:2019},
+  {id:"T20P", tank:20,  year:2022},
+  {id:"T25",  tank:20,  year:2024},
+  {id:"T25P", tank:20,  year:2025},
+  {id:"T30",  tank:30,  year:2020},
+  {id:"T40",  tank:40,  year:2022},
+  {id:"T50",  tank:40,  year:2024},
+  {id:"T55",  tank:50,  year:2026},
+  {id:"T70P", tank:70,  year:2025},
+  {id:"T100", tank:100, year:2025}
 ];
 
 /* ===================== i18n ===================== */
@@ -515,8 +516,8 @@ zh:{
        "无人机一英亩只喷十几二十升。如果照标签的浓度配，一英亩下去的药量只有常规的几十分之一，等于白喷。",
        "正确做法只有一个：先算出<b>每英亩要多少药</b>，再把这个量装进无人机那一点点水里。本软件的「标签每桶」模式就是替你做这个换算。",
        "所以「常规喷雾用水量」这一栏一定要填你自己真实的数字 —— 你以前用过山泵，一英亩实际打了多少水。"],
-  detTable:"大疆机型药桶容量", thModel:"机型", thTank:"药桶容量",
-  tableNote:"喷洒药桶容量，撒肥料斗容量不在此列。资料核对于 2026 年 9 月。请以你自己那台机的实际容量为准。",
+  detTable:"大疆机型药桶容量", thModel:"机型", thYear:"首发年份", thTank:"药桶容量",
+  tableNote:"年份为大疆首次发布年份，各地区上市时间可能不同。仅列喷洒药桶容量，不包括撒肥料斗。资料核对于 2026 年 9 月；请以你自己那台机为准。",
   detMath:"计算方法",
   math:["总喷液量 ＝ 面积 × 每英亩喷液量",
         "桶数 ＝ 总喷液量 ÷ 药桶容量（进位取整）",
@@ -584,8 +585,8 @@ en:{
        "A drone puts a dozen or two litres on the same acre. Mix to the label concentration and the acre receives a small fraction of the intended dose — the spray is wasted.",
        "There is only one correct route: work out <b>how much product the acre needs</b>, then put that amount into the drone's much smaller volume of water. The label-per-tank mode does this conversion for you.",
        "So the conventional water volume field must hold your own real figure — how much water your power pump actually put on an acre."],
-  detTable:"DJI spray tank capacities", thModel:"Model", thTank:"Spray tank",
-  tableNote:"Spray tank only; spreading hoppers are excluded. Checked September 2026. Confirm against your own aircraft.",
+  detTable:"DJI spray tank capacities", thModel:"Model", thYear:"First introduced", thTank:"Spray tank",
+  tableNote:"Years are DJI's first introduction; regional availability varied. Spray tanks only; spreading hoppers are excluded. Checked September 2026. Confirm against your own aircraft.",
   detMath:"How it calculates",
   math:["Total spray volume = area × spray volume per acre",
         "Loads = total volume ÷ tank volume, rounded up",
@@ -653,8 +654,8 @@ ms:{
        "Dron hanya menyembur belasan hingga dua puluh liter se-ekar. Jika dicampur mengikut kepekatan label, ekar itu hanya menerima sepersekian daripada dos sebenar — semburan itu sia-sia.",
        "Hanya ada satu cara yang betul: kira <b>berapa banyak racun diperlukan se-ekar</b>, kemudian masukkan jumlah itu ke dalam air dron yang jauh lebih sedikit. Mod label setangki melakukan penukaran ini untuk anda.",
        "Jadi ruangan air semburan biasa mesti diisi dengan angka sebenar anda — berapa banyak air yang pam anda gunakan se-ekar."],
-  detTable:"Isipadu tangki racun DJI", thModel:"Model", thTank:"Tangki racun",
-  tableNote:"Tangki racun sahaja; hoper baja tidak disenaraikan. Disemak September 2026. Sahkan dengan dron anda sendiri.",
+  detTable:"Isipadu tangki racun DJI", thModel:"Model", thYear:"Mula diperkenalkan", thTank:"Tangki racun",
+  tableNote:"Tahun merujuk kepada pengenalan pertama oleh DJI; tarikh jualan berbeza mengikut wilayah. Hanya tangki racun disenaraikan, bukan hoper baja. Disemak September 2026. Sahkan dengan dron anda sendiri.",
   detMath:"Cara pengiraan",
   math:["Jumlah isipadu semburan = luas × isipadu semburan se-ekar",
         "Muatan = jumlah isipadu ÷ isipadu tangki, dibundarkan ke atas",
@@ -858,8 +859,8 @@ function renderChrome(){
   for(i2=0;i2<m.length;i2++) h+="<p>"+m[i2]+"</p>";
   $("mathBody").innerHTML=h;
 
-  h="<tr><th>"+t("thModel")+"</th><th class='num'>"+t("thTank")+"</th></tr>";
-  MODELS.forEach(function(x){ h+="<tr><td>Agras "+x.id+"</td><td class='num'>"+x.tank+" L</td></tr>"; });
+  h="<tr><th>"+t("thModel")+"</th><th class='num'>"+t("thYear")+"</th><th class='num'>"+t("thTank")+"</th></tr>";
+  MODELS.forEach(function(x){ h+="<tr><td>Agras "+x.id+"</td><td class='num'>"+x.year+"</td><td class='num'>"+x.tank+" L</td></tr>"; });
   $("modelTable").innerHTML=h;
   $("tableNote").textContent=t("tableNote");
 }
