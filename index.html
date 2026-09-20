@@ -310,13 +310,47 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
       </div>
 
       <div class="field critical-field">
-        <label class="lab" for="rate"><span data-t="labRate">无人机每英亩喷液量</span><span class="key-badge" data-t="keyInput">最重要</span></label>
-        <div class="chips" id="rateChips"></div>
+        <label class="lab" for="rate"><span data-t="labRate">DJI 喷洒量</span><span class="key-badge" data-t="keyInput">最重要</span></label>
+        <div class="chips grow" id="rateUnitChips"></div>
         <div class="row joined" style="margin-top:6px">
           <input class="grow" type="number" id="rate" inputmode="decimal" min="0" step="0.5" value="20">
-          <div class="suffix">L / <span data-t="unAcre">英亩</span></div>
+          <div class="suffix" id="rateSuffix">L / 英亩</div>
         </div>
-        <p class="hint" data-t="hintRate">这是软件最重要的数字。按钮只是常见起点，请用下方的校准工具量出你自己的实际值。</p>
+        <p class="hint" data-t="hintRate">从 DJI 遥控器的「任务设置 → 喷洒量」抄录。建议用清水试飞核对。</p>
+      </div>
+
+      <div class="field">
+        <details class="model-picker" id="calibrationTool">
+          <summary data-t="detCal">清水试飞：核对实际喷洒量</summary>
+          <div class="model-picker-body">
+            <p class="hint" data-t="calIntro">使用正式作业设置装清水试飞，记录实际用水量和覆盖面积。</p>
+            <div class="field">
+              <label class="lab" for="calL" data-t="calL">实际用水量</label>
+              <div class="row joined"><input class="grow" type="number" id="calL" inputmode="decimal" min="0" step="0.5" placeholder="40"><div class="suffix">L</div></div>
+            </div>
+            <div class="field">
+              <label class="lab" for="calA" data-t="calA">实际覆盖面积</label>
+              <div class="chips grow" id="calUnitChips"></div>
+              <div class="row joined" style="margin-top:6px"><input class="grow" type="number" id="calA" inputmode="decimal" min="0" step="0.1" placeholder="2"><div class="suffix" id="calSuffix">英亩</div></div>
+            </div>
+            <div id="calOut"></div>
+            <button class="btn" id="calUse" data-t="calUse">采用实测值</button>
+          </div>
+        </details>
+      </div>
+
+      <div class="field">
+        <details class="model-picker" id="profileTool">
+          <summary data-t="detProfile">DJI 作业参数（选填）</summary>
+          <div class="model-picker-body">
+            <p class="hint" data-t="profileHint">保存本次设置，方便下次重复同一作业；不会改变药剂用量。</p>
+            <div class="field"><label class="lab" for="profileName" data-t="profileName">作业名称</label><input type="text" id="profileName"></div>
+            <div class="field"><label class="lab" for="droplet" data-t="droplet">雾滴大小</label><div class="row joined"><input class="grow" type="number" id="droplet" inputmode="decimal" min="0"><div class="suffix">μm</div></div></div>
+            <div class="field"><label class="lab" for="speed" data-t="speed">飞行速度</label><div class="row joined"><input class="grow" type="number" id="speed" inputmode="decimal" min="0" step="0.1"><div class="suffix">m/s</div></div></div>
+            <div class="field"><label class="lab" for="height" data-t="height">离作物高度</label><div class="row joined"><input class="grow" type="number" id="height" inputmode="decimal" min="0" step="0.1"><div class="suffix">m</div></div></div>
+            <div class="field"><label class="lab" for="spacing" data-t="spacing">航线间距</label><div class="row joined"><input class="grow" type="number" id="spacing" inputmode="decimal" min="0" step="0.1"><div class="suffix">m</div></div></div>
+          </div>
+        </details>
       </div>
 
       <div class="field">
@@ -361,29 +395,6 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
 
   <!-- ============ REFERENCE ============ -->
   <section>
-    <details>
-      <summary data-t="detCal">校准：量出你自己的每英亩喷液量</summary>
-      <div class="det-body">
-        <p data-t="calIntro">装一箱水，正常作业飞完，记录这一箱喷完覆盖了多大面积。</p>
-        <div class="field">
-          <label class="lab" for="calL" data-t="calL">这一箱装了多少水</label>
-          <div class="row joined">
-            <input class="grow" type="number" id="calL" inputmode="decimal" min="0" step="0.5" placeholder="40">
-            <div class="suffix">L</div>
-          </div>
-        </div>
-        <div class="field">
-          <label class="lab" for="calA" data-t="calA">喷完覆盖的面积</label>
-          <div class="row joined">
-            <input class="grow" type="number" id="calA" inputmode="decimal" min="0" step="0.1" placeholder="2">
-            <div class="suffix" data-t="unAcre">英亩</div>
-          </div>
-        </div>
-        <div id="calOut"></div>
-        <button class="btn" id="calUse" data-t="calUse">用这个数值</button>
-      </div>
-    </details>
-
     <details>
       <summary data-t="detWhy">为什么不能照搬桶装浓度</summary>
       <div class="det-body" id="whyBody"></div>
@@ -445,10 +456,9 @@ zh:{
   labAreaUnit:"面积按什么算", uAc:"英亩", uHa:"公顷", uTree:"棵树",
   labArea:"喷药面积", labAreaTree:"喷药树数",
   labDensity:"每英亩树数", unTreesAc:"棵/英亩", unAcre:"英亩", unTree:"棵",
-  labRate:"无人机每英亩喷液量",
+  labRate:"DJI 喷洒量",
   keyInput:"最重要",
-  hintRate:"这是软件最重要的数字。按钮只是常见起点，请用下方的校准工具量出你自己的实际值。",
-  rate1:"大田 6", rate2:"果园 12", rate3:"榴莲 20", rate4:"高大密冠 30",
+  hintRate:"从 DJI 遥控器的「任务设置 → 喷洒量」抄录。建议用清水试飞核对。",
   labConv:"常规喷雾用水量（过山泵／背包桶）",
   hintConv:"只有当药剂按「标签每桶」或「稀释比例」输入时才会用到，用来换算成每英亩用量。例：40 棵 × 每棵 20 L = 800 L／英亩。",
   labSplit:"分箱方式", hintSplit:"最后决定每箱装同样多，还是先装满、最后一箱装余量。", splitEven:"每箱一样", splitFull:"先装满，最后余量",
@@ -478,10 +488,12 @@ zh:{
   warnPartial:"最后一箱只装 {v} L，浓度与前面几箱相同。",
   tipMix:"先在药箱里放约一半清水，逐一加入并搅匀每种药剂，最后补水至刻度。",
   btnCopy:"复制配药单", copied:"已复制",
-  detCal:"校准：量出你自己的每英亩喷液量",
-  calIntro:"装一箱水，正常作业飞完，记录这一箱喷完覆盖了多大面积。",
-  calL:"这一箱装了多少水", calA:"喷完覆盖的面积",
-  calResult:"你的实际喷液量是 {v} L／英亩", calUse:"用这个数值",
+  detCal:"清水试飞：核对实际喷洒量",
+  calIntro:"使用正式作业设置装清水试飞，记录实际用水量和覆盖面积。",
+  calL:"实际用水量", calA:"实际覆盖面积",
+  calResult:"实测喷洒量：{v}", calUse:"采用实测值",
+  detProfile:"DJI 作业参数（选填）", profileHint:"保存本次设置，方便下次重复同一作业；不会改变药剂用量。",
+  profileName:"作业名称", droplet:"雾滴大小", speed:"飞行速度", height:"离作物高度", spacing:"航线间距",
   detWhy:"为什么不能照搬桶装浓度",
   why:["农药标签上的「每 16 L 水加 20 mL」，是给背包桶或过山泵写的。那种喷法一英亩要用几百升水。",
        "无人机一英亩只喷十几二十升。如果照标签的浓度配，一英亩下去的药量只有常规的几十分之一，等于白喷。",
@@ -506,10 +518,9 @@ en:{
   labAreaUnit:"Measure the block by", uAc:"Acres", uHa:"Hectares", uTree:"Trees",
   labArea:"Area to spray", labAreaTree:"Trees to spray",
   labDensity:"Trees per acre", unTreesAc:"trees/acre", unAcre:"acre", unTree:"trees",
-  labRate:"Drone spray volume per acre",
+  labRate:"DJI application rate",
   keyInput:"Most important",
-  hintRate:"This is the number that matters most. The buttons are common starting points — measure your own with the calibration tool below.",
-  rate1:"Field 6", rate2:"Orchard 12", rate3:"Durian 20", rate4:"Tall dense 30",
+  hintRate:"Copy this from Task Settings → Application Rate on the DJI controller. Verify it with a water-only flight.",
   labConv:"Conventional spray water (power pump / knapsack)",
   hintConv:"Used only when a product is entered as a label dose per tank or a dilution ratio, to convert it to a per-acre rate. Example: 40 trees × 20 L each = 800 L/acre.",
   labSplit:"Split the loads", hintSplit:"Finally, choose equal loads or full tanks with a smaller last load.", splitEven:"Same each load", splitFull:"Full loads, remainder last",
@@ -539,10 +550,12 @@ en:{
   warnPartial:"The last load holds only {v} L, at the same concentration as the others.",
   tipMix:"Half-fill the tank with water, add and stir in each product one at a time, then top up to the mark.",
   btnCopy:"Copy mixing sheet", copied:"Copied",
-  detCal:"Calibrate: measure your own spray volume per acre",
-  calIntro:"Load one tank with water, fly it as you normally would, and note the area it covered.",
-  calL:"Water in that tank", calA:"Area it covered",
-  calResult:"Your real spray volume is {v} L/acre", calUse:"Use this value",
+  detCal:"Water test: verify the actual application rate",
+  calIntro:"Fly clean water with the real job settings, then record the water used and area covered.",
+  calL:"Water actually used", calA:"Area actually covered",
+  calResult:"Measured application rate: {v}", calUse:"Use measured value",
+  detProfile:"DJI operation settings (optional)", profileHint:"Save the settings for repeating this job. They do not change the product dose.",
+  profileName:"Operation name", droplet:"Droplet size", speed:"Flight speed", height:"Height above crops", spacing:"Route spacing",
   detWhy:"Why a knapsack dilution cannot be copied across",
   why:["\u201c20 mL per 16 L of water\u201d on a label is written for a knapsack or a power pump. That way of spraying puts hundreds of litres on an acre.",
        "A drone puts a dozen or two litres on the same acre. Mix to the label concentration and the acre receives a small fraction of the intended dose — the spray is wasted.",
@@ -567,10 +580,9 @@ ms:{
   labAreaUnit:"Ukur kawasan ikut", uAc:"Ekar", uHa:"Hektar", uTree:"Pokok",
   labArea:"Luas kawasan", labAreaTree:"Bilangan pokok",
   labDensity:"Pokok se-ekar", unTreesAc:"pokok/ekar", unAcre:"ekar", unTree:"pokok",
-  labRate:"Isipadu semburan dron se-ekar",
+  labRate:"Kadar aplikasi DJI",
   keyInput:"Paling penting",
-  hintRate:"Inilah angka yang paling penting. Butang di atas hanya titik mula biasa — ukur angka anda sendiri dengan alat penentukuran di bawah.",
-  rate1:"Sawah 6", rate2:"Dusun 12", rate3:"Durian 20", rate4:"Tinggi lebat 30",
+  hintRate:"Salin daripada Tetapan Tugas → Kadar Aplikasi pada alat kawalan DJI. Sahkan dengan penerbangan air bersih.",
   labConv:"Air semburan biasa (pam tekanan tinggi / pam sandang)",
   hintConv:"Hanya digunakan apabila dos dimasukkan sebagai dos label setangki atau nisbah pencairan, untuk menukarnya kepada kadar se-ekar. Contoh: 40 pokok × 20 L = 800 L/ekar.",
   labSplit:"Cara bahagi muatan", hintSplit:"Akhir sekali, pilih muatan sama rata atau tangki penuh dengan muatan terakhir yang lebih kecil.", splitEven:"Setiap muatan sama", splitFull:"Penuh dahulu, baki akhir",
@@ -600,10 +612,12 @@ ms:{
   warnPartial:"Muatan terakhir hanya {v} L, dengan kepekatan yang sama seperti yang lain.",
   tipMix:"Isi tangki separuh dengan air, masukkan dan kacau setiap racun satu demi satu, kemudian tambah air hingga penuh.",
   btnCopy:"Salin senarai campuran", copied:"Disalin",
-  detCal:"Penentukuran: ukur isipadu semburan se-ekar anda sendiri",
-  calIntro:"Isi satu tangki dengan air, terbangkan seperti biasa, dan catat luas yang dilitupinya.",
-  calL:"Air dalam tangki itu", calA:"Luas yang dilitupi",
-  calResult:"Isipadu semburan sebenar anda ialah {v} L/ekar", calUse:"Guna nilai ini",
+  detCal:"Ujian air: sahkan kadar aplikasi sebenar",
+  calIntro:"Terbangkan air bersih dengan tetapan kerja sebenar, kemudian catat air digunakan dan luas diliputi.",
+  calL:"Air sebenar digunakan", calA:"Luas sebenar diliputi",
+  calResult:"Kadar aplikasi diukur: {v}", calUse:"Guna nilai diukur",
+  detProfile:"Tetapan operasi DJI (pilihan)", profileHint:"Simpan tetapan untuk mengulangi kerja ini. Tetapan ini tidak mengubah dos racun.",
+  profileName:"Nama operasi", droplet:"Saiz titisan", speed:"Kelajuan penerbangan", height:"Ketinggian atas tanaman", spacing:"Jarak laluan",
   detWhy:"Mengapa pencairan pam sandang tidak boleh disalin terus",
   why:["\u201c20 mL setiap 16 L air\u201d pada label ditulis untuk pam sandang atau pam tekanan tinggi. Cara itu menggunakan beratus liter se-ekar.",
        "Dron hanya menyembur belasan hingga dua puluh liter se-ekar. Jika dicampur mengikut kepekatan label, ekar itu hanya menerima sepersekian daripada dos sebenar — semburan itu sia-sia.",
@@ -627,7 +641,8 @@ var DEFAULT={
   lang:null, size:0,
   model:"T50", tank:40,
   areaUnit:"ac", area:5, density:40,
-  rate:20, conv:800, split:"even",
+  rate:20, rateUnit:"ac", calUnit:"ac", conv:800, split:"even",
+  profile:{name:"",droplet:"",speed:"",height:"",spacing:""},
   products:[{name:"",basis:"area",unit:"ml",dose:"",labelTank:16,ratio:""}]
 };
 var S=load();
@@ -664,7 +679,10 @@ function amount(base,liquid){
   return fmt(base)+(liquid?" mL":" g");
 }
 var TO_BASE={ml:1,l:1000,g:1,kg:1000};
+var HA_PER_ACRE=0.404685642;
 function isLiquidUnit(u){ return u==="ml"||u==="l"; }
+function displayRate(){ return S.rateUnit==="ha"?num(S.rate)/HA_PER_ACRE:num(S.rate); }
+function rateFromDisplay(v){ return S.rateUnit==="ha"?num(v)*HA_PER_ACRE:num(v); }
 
 /* ===================== core calculation ===================== */
 function compute(){
@@ -825,11 +843,25 @@ function refreshChips(){
     save(); renderInputs(); renderResult(); $("modelPicker").open=false;
   });
   renderModelSummary();
-  chipRow($("rateChips"),[
-    {label:t("rate1"),value:6},{label:t("rate2"),value:12},
-    {label:t("rate3"),value:20},{label:t("rate4"),value:30}
-  ],num(S.rate),function(v){ S.rate=v; $("rate").value=v; save(); renderInputs(); renderResult(); });
+  renderRateUnits();
   renderSplitChips();
+}
+
+function renderRateUnits(){
+  chipRow($("rateUnitChips"),[
+    {label:"L / "+t("unAcre"),value:"ac"},{label:"L / "+t("uHa"),value:"ha"}
+  ],S.rateUnit||"ac",function(v){
+    S.rateUnit=v; save(); renderInputs(); renderResult();
+  });
+  $("rateSuffix").textContent="L / "+(S.rateUnit==="ha"?t("uHa"):t("unAcre"));
+  setVal("rate",fmt(displayRate()));
+}
+
+function renderCalUnits(){
+  chipRow($("calUnitChips"),[
+    {label:t("unAcre"),value:"ac"},{label:t("uHa"),value:"ha"}
+  ],S.calUnit||"ac",function(v){ S.calUnit=v; save(); renderCalUnits(); calUpdate(); });
+  $("calSuffix").textContent=S.calUnit==="ha"?t("uHa"):t("unAcre");
 }
 
 function splitOptions(){
@@ -878,15 +910,16 @@ function renderInputs(){
     {label:t("uAc"),value:"ac"},{label:t("uHa"),value:"ha"},{label:t("uTree"),value:"tree"}
   ],S.areaUnit,function(v){ S.areaUnit=v; save(); renderChrome(); renderInputs(); renderResult(); });
 
-  chipRow($("rateChips"),[
-    {label:t("rate1"),value:6},{label:t("rate2"),value:12},
-    {label:t("rate3"),value:20},{label:t("rate4"),value:30}
-  ],num(S.rate),function(v){ S.rate=v; $("rate").value=v; save(); renderInputs(); renderResult(); });
+  renderRateUnits();
+  renderCalUnits();
 
   renderSplitChips();
 
   setVal("tank",S.tank); setVal("area",S.area); setVal("density",S.density);
-  setVal("rate",S.rate); setVal("conv",S.conv);
+  setVal("rate",fmt(displayRate())); setVal("conv",S.conv);
+  var profile=S.profile||DEFAULT.profile;
+  setVal("profileName",profile.name); setVal("droplet",profile.droplet);
+  setVal("speed",profile.speed); setVal("height",profile.height); setVal("spacing",profile.spacing);
 
   renderProducts();
 }
@@ -1085,6 +1118,14 @@ function sheetText(){
   L.push("");
   r.totals.forEach(function(x){ L.push(t("totalNeed")+" — "+x.name+": "+amount(x.base,x.liquid)); });
   if(r.mult>=1.5) L.push(fill(t("multTitle"),{x:fmt(r.mult)}));
+  var p=S.profile||{};
+  var settings=[];
+  if(p.name) settings.push(p.name);
+  if(p.droplet) settings.push(t("droplet")+": "+p.droplet+" μm");
+  if(p.speed) settings.push(t("speed")+": "+p.speed+" m/s");
+  if(p.height) settings.push(t("height")+": "+p.height+" m");
+  if(p.spacing) settings.push(t("spacing")+": "+p.spacing+" m");
+  if(settings.length){ L.push(""); L.push(t("detProfile")+":"); settings.forEach(function(x){ L.push("  "+x); }); }
   return L.join("\n");
 }
 
@@ -1098,7 +1139,17 @@ function bindNum(id,key){
   });
 }
 bindNum("tank","tank"); bindNum("area","area"); bindNum("density","density");
-bindNum("rate","rate"); bindNum("conv","conv");
+bindNum("conv","conv");
+$("rate").addEventListener("input",function(){
+  S.rate=rateFromDisplay($("rate").value); save(); renderSplitChips(); renderResult();
+});
+
+["profileName","droplet","speed","height","spacing"].forEach(function(id){
+  $(id).addEventListener("input",function(){
+    if(!S.profile) S.profile=clone(DEFAULT.profile);
+    S.profile[id==="profileName"?"name":id]=$(id).value; save();
+  });
+});
 
 $("addProd").addEventListener("click",function(){
   if(S.products.length>=4) return;
@@ -1143,9 +1194,12 @@ function fallbackCopy(txt){
 function calUpdate(){
   var L=num($("calL").value), a=num($("calA").value), out=$("calOut");
   if(L>0 && a>0){
-    var v=L/a;
-    out.innerHTML='<div class="note green">'+esc(fill(t("calResult"),{v:fmt(v)}))+'</div>';
-    out.dataset.v=v;
+    var acres=S.calUnit==="ha"?a*2.471054:a;
+    var rateAc=L/acres;
+    var shown=S.rateUnit==="ha"?rateAc/HA_PER_ACRE:rateAc;
+    var unit="L / "+(S.rateUnit==="ha"?t("uHa"):t("unAcre"));
+    out.innerHTML='<div class="note green">'+esc(fill(t("calResult"),{v:fmt(shown)+" "+unit}))+'</div>';
+    out.dataset.v=rateAc;
   }else{ out.innerHTML=""; out.dataset.v=""; }
 }
 $("calL").addEventListener("input",calUpdate);
@@ -1153,7 +1207,7 @@ $("calA").addEventListener("input",calUpdate);
 $("calUse").addEventListener("click",function(){
   var v=parseFloat($("calOut").dataset.v||"");
   if(isFinite(v)&&v>0){
-    S.rate=Math.round(v*10)/10; save();
+    S.rate=v; save();
     renderInputs(); renderResult();
     window.scrollTo({top:0,behavior:"smooth"});
   }
