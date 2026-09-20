@@ -860,7 +860,9 @@ function renderChrome(){
   $("mathBody").innerHTML=h;
 
   h="<tr><th>"+t("thModel")+"</th><th class='num'>"+t("thYear")+"</th><th class='num'>"+t("thTank")+"</th></tr>";
-  MODELS.forEach(function(x){ h+="<tr><td>Agras "+x.id+"</td><td class='num'>"+x.year+"</td><td class='num'>"+x.tank+" L</td></tr>"; });
+  MODELS.slice().sort(function(a,b){ return a.year-b.year || a.tank-b.tank; }).forEach(function(x){
+    h+="<tr><td>Agras "+x.id+"</td><td class='num'>"+x.year+"</td><td class='num'>"+x.tank+" L</td></tr>";
+  });
   $("modelTable").innerHTML=h;
   $("tableNote").textContent=t("tableNote");
 }
