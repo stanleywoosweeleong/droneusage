@@ -345,15 +345,6 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
         </details>
       </div>
 
-      <div class="field">
-        <label class="lab" for="conv" data-t="labConv">常规喷雾用水量（过山泵／背包桶）</label>
-        <div class="row joined">
-          <input class="grow" type="number" id="conv" inputmode="decimal" min="0" step="10" value="800">
-          <div class="suffix">L / <span data-t="unAcre">英亩</span></div>
-        </div>
-        <p class="hint" data-t="hintConv">只有当药剂按「标签每桶」或「稀释比例」输入时才会用到，用来换算成每英亩用量。例：40 棵 × 每棵 20 L = 800 L／英亩。</p>
-      </div>
-
     </div>
   </section>
 
@@ -365,6 +356,14 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
     </div>
     <div class="sec-body">
       <div id="prodList"></div>
+      <div class="field hidden" id="convField">
+        <label class="lab" for="conv" data-t="labConv">常规喷雾用水量（过山泵／背包桶）</label>
+        <div class="row joined">
+          <input class="grow" type="number" id="conv" inputmode="decimal" min="0" step="10" value="800">
+          <div class="suffix">L / <span data-t="unAcre">英亩</span></div>
+        </div>
+        <p class="hint" data-t="hintConv">只有当药剂按「标签每桶」或「稀释比例」输入时才会用到，用来换算成每英亩用量。例：40 棵 × 每棵 20 L = 800 L／英亩。</p>
+      </div>
       <button class="btn" id="addProd" data-t="btnAdd">+ 添加药剂</button>
       <div class="field load-choice">
         <label class="lab" data-t="labSplit">分箱方式</label>
@@ -987,6 +986,7 @@ function renderProducts(){
     }
     list.appendChild(d);
   });
+  $("convField").classList.toggle("hidden",!S.products.some(function(p){ return p.basis==="tank"||p.basis==="ratio"; }));
   $("addProd").style.display = S.products.length>=4 ? "none":"block";
 }
 
@@ -1120,6 +1120,12 @@ function sheetText(){
 }
 
 /* ===================== wiring ===================== */
+/* Desktop browsers spin a focused number field with the mouse wheel.
+   Blur before the default wheel action so scrolling can never alter a dose. */
+document.addEventListener("wheel",function(){
+  if(document.activeElement&&document.activeElement.type==="number") document.activeElement.blur();
+},{passive:true});
+
 function bindNum(id,key){
   $(id).addEventListener("input",function(){
     S[key]=$(id).value;
