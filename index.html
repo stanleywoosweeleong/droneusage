@@ -272,8 +272,8 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
         <div class="chips" id="modelChips"></div>
       </div>
 
-      <div class="field">
-        <label class="lab" for="tank" data-t="labTank">药箱容量</label>
+      <div class="field hidden" id="tankField">
+        <label class="lab" for="tank" data-t="labCustomTank">自定药箱容量</label>
         <div class="row joined">
           <input class="grow" type="number" id="tank" inputmode="decimal" min="0" step="0.5" value="40">
           <div class="suffix">L</div>
@@ -432,7 +432,8 @@ var I18N = {
 zh:{
   code:"中文", title:"无人机配药", sub:"以 DJI 机型为基准",
   secInputs:"喷药设定", secInputsNote:"计算所需的全部输入都在这里",
-  labDrone:"无人机机型", custom:"自定",
+  labDrone:"无人机机型与药箱容量", custom:"自定",
+  labCustomTank:"自定药箱容量",
   labTank:"药箱容量", hintTank:"以你实际装的量为准，不必装满。",
   labAreaUnit:"面积按什么算", uAc:"英亩", uHa:"公顷", uTree:"棵树",
   labArea:"喷药面积", labAreaTree:"喷药树数",
@@ -492,7 +493,8 @@ zh:{
 en:{
   code:"EN", title:"DroneDose", sub:"DJI models as the baseline",
   secInputs:"Spray setup", secInputsNote:"Every input the calculation needs sits here",
-  labDrone:"Drone model", custom:"Custom",
+  labDrone:"Drone model and tank capacity", custom:"Custom",
+  labCustomTank:"Custom tank capacity",
   labTank:"Spray tank", hintTank:"Use what you actually load, not the rated maximum.",
   labAreaUnit:"Measure the block by", uAc:"Acres", uHa:"Hectares", uTree:"Trees",
   labArea:"Area to spray", labAreaTree:"Trees to spray",
@@ -552,7 +554,8 @@ en:{
 ms:{
   code:"BM", title:"DroneDose", sub:"Berasaskan model DJI",
   secInputs:"Tetapan semburan", secInputsNote:"Semua input yang diperlukan ada di sini",
-  labDrone:"Model dron", custom:"Sendiri",
+  labDrone:"Model dron dan isipadu tangki", custom:"Sendiri",
+  labCustomTank:"Isipadu tangki sendiri",
   labTank:"Tangki racun", hintTank:"Guna jumlah yang anda betul-betul isi, bukan muatan maksimum.",
   labAreaUnit:"Ukur kawasan ikut", uAc:"Ekar", uHa:"Hektar", uTree:"Pokok",
   labArea:"Luas kawasan", labAreaTree:"Bilangan pokok",
@@ -800,7 +803,8 @@ function setVal(id,v){
 function refreshChips(){
   var f=MODELS.filter(function(m){return m.id===S.model;})[0];
   if(f && Math.abs(num(S.tank)-f.tank)>1e-9) S.model="custom";
-  var opts=MODELS.map(function(m){ return {label:m.id,value:m.id}; });
+  $("tankField").classList.toggle("hidden",S.model!=="custom");
+  var opts=MODELS.map(function(m){ return {label:m.id+" · "+m.tank+" L",value:m.id}; });
   opts.push({label:t("custom"),value:"custom"});
   chipRow($("modelChips"),opts,S.model,function(v){
     S.model=v;
@@ -846,7 +850,8 @@ function renderSplitChips(){
 }
 
 function renderInputs(){
-  var opts=MODELS.map(function(m){ return {label:m.id,value:m.id}; });
+  $("tankField").classList.toggle("hidden",S.model!=="custom");
+  var opts=MODELS.map(function(m){ return {label:m.id+" · "+m.tank+" L",value:m.id}; });
   opts.push({label:t("custom"),value:"custom"});
   chipRow($("modelChips"),opts,S.model,function(v){
     S.model=v;
