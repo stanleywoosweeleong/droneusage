@@ -357,12 +357,12 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
     <div class="sec-body">
       <div id="prodList"></div>
       <div class="field hidden" id="convField">
-        <label class="lab" for="conv" data-t="labConv">常规喷雾用水量（过山泵／背包桶）</label>
+        <label class="lab" for="conv" data-t="labConv">常规喷雾量</label>
         <div class="row joined">
           <input class="grow" type="number" id="conv" inputmode="decimal" min="0" step="10">
           <div class="suffix">L / <span data-t="unAcre">英亩</span></div>
         </div>
-        <p class="hint" data-t="hintConv">只有当药剂按「标签每桶」或「稀释比例」输入时才会用到，用来换算成每英亩用量。例：40 棵 × 每棵 20 L = 800 L／英亩。</p>
+        <p class="hint" id="convHint" data-t="hintConv">用实际常规喷雾量，把标签每桶用量换算成每英亩药量。</p>
       </div>
       <button class="btn" id="addProd" data-t="btnAdd">+ 添加药剂</button>
       <div class="field load-choice">
@@ -449,16 +449,17 @@ zh:{
   labRate:"DJI 喷洒量",
   keyInput:"最重要",
   hintRate:"从 DJI 遥控器的「任务设置 → 喷洒量」抄录。建议用清水试飞核对。",
-  labConv:"常规喷雾用水量（过山泵／背包桶）",
-  hintConv:"只有当药剂按「标签每桶」或「稀释比例」输入时才会用到，用来换算成每英亩用量。例：40 棵 × 每棵 20 L = 800 L／英亩。",
+  labConv:"常规喷雾量",
+  hintConv:"用实际常规喷雾量，把标签每桶用量换算成每英亩药量。",
+  hintConvRatio:"把地面稀释换算成每英亩药量，再计算无人机配比。只在换算后的无人机浓度获准时使用。",
   labSplit:"分箱方式", hintSplit:"最后决定每箱装同样多，还是先装满、最后一箱装余量。", splitEven:"每箱一样", splitFull:"先装满，最后余量",
   secProducts:"药剂", secProductsNote:"一次最多 4 种。混配前请先确认药剂之间可以混用。",
   prodName:"药剂名称", unnamed:"药剂",
-  basisArea:"每英亩", basisTank:"标签每桶", basisRatio:"换算地面稀释",
+  basisArea:"每英亩", basisTank:"标签每桶", basisRatio:"地面稀释",
   basisHelpArea:"标签例子：每英亩 500 mL。直接填写标签规定的每英亩用量。",
   basisHelpTank:"标签例子：每 16 L 水加 20 mL。本软件会先换算成每英亩用量。",
-  basisHelpRatio:"地面喷雾例子：稀释 1:1000。本软件不会把 1:1000 直接照搬到无人机；它会按常规每英亩用水量换算，保留每英亩药量。",
-  doseArea:"每英亩用量", doseTank:"标签用量", doseRatio:"地面稀释 1 ∶",
+  basisHelpRatio:"",
+  doseArea:"每英亩用量", doseTank:"标签用量", doseRatio:"稀释比例 1 ∶",
   perTank:"每", water:"L 水", btnAdd:"+ 添加药剂",
   secResult:"配药单", secResultNote:"按这个装每一箱",
   loads:"箱", perLoad:"每箱", loadN:"第 {n} 箱",
@@ -511,16 +512,17 @@ en:{
   labRate:"DJI application rate",
   keyInput:"Most important",
   hintRate:"Copy this from Task Settings → Application Rate on the DJI controller. Verify it with a water-only flight.",
-  labConv:"Conventional spray water (power pump / knapsack)",
-  hintConv:"Used only when a product is entered as a label dose per tank or a dilution ratio, to convert it to a per-acre rate. Example: 40 trees × 20 L each = 800 L/acre.",
+  labConv:"Conventional spray volume",
+  hintConv:"Uses your actual conventional spray volume to convert a label-per-tank dose into product per acre.",
+  hintConvRatio:"Converts the ground dilution into product per acre before calculating the drone mix. Use only when the resulting drone concentration is permitted.",
   labSplit:"Split the loads", hintSplit:"Finally, choose equal loads or full tanks with a smaller last load.", splitEven:"Same each load", splitFull:"Full loads, remainder last",
   secProducts:"Products", secProductsNote:"Up to 4 at a time. Confirm the products are compatible before tank-mixing.",
   prodName:"Product name", unnamed:"Product",
-  basisArea:"Per acre", basisTank:"Label per tank", basisRatio:"Convert ground dilution",
+  basisArea:"Per acre", basisTank:"Label per tank", basisRatio:"Ground dilution",
   basisHelpArea:"Label example: 500 mL per acre. Enter the label's per-acre rate directly.",
   basisHelpTank:"Label example: 20 mL per 16 L water. The app first converts this to a per-acre rate.",
-  basisHelpRatio:"Ground-spray example: dilute 1:1000. The app does not copy 1:1000 into the drone tank; it uses conventional water per acre to preserve the product dose per acre.",
-  doseArea:"Rate per acre", doseTank:"Label dose", doseRatio:"Ground dilution 1 :",
+  basisHelpRatio:"",
+  doseArea:"Rate per acre", doseTank:"Label dose", doseRatio:"Dilution ratio 1 :",
   perTank:"per", water:"L water", btnAdd:"+ Add product",
   secResult:"Mixing sheet", secResultNote:"Load every tank like this",
   loads:"loads", perLoad:"per load", loadN:"Load {n}",
@@ -573,16 +575,17 @@ ms:{
   labRate:"Kadar aplikasi DJI",
   keyInput:"Paling penting",
   hintRate:"Salin daripada Tetapan Tugas → Kadar Aplikasi pada alat kawalan DJI. Sahkan dengan penerbangan air bersih.",
-  labConv:"Air semburan biasa (pam tekanan tinggi / pam sandang)",
-  hintConv:"Hanya digunakan apabila dos dimasukkan sebagai dos label setangki atau nisbah pencairan, untuk menukarnya kepada kadar se-ekar. Contoh: 40 pokok × 20 L = 800 L/ekar.",
+  labConv:"Isipadu semburan biasa",
+  hintConv:"Menggunakan isipadu semburan biasa sebenar untuk menukar dos label setangki kepada racun se-ekar.",
+  hintConvRatio:"Menukar pencairan darat kepada racun se-ekar sebelum mengira campuran dron. Guna hanya apabila kepekatan dron yang terhasil dibenarkan.",
   labSplit:"Cara bahagi muatan", hintSplit:"Akhir sekali, pilih muatan sama rata atau tangki penuh dengan muatan terakhir yang lebih kecil.", splitEven:"Setiap muatan sama", splitFull:"Penuh dahulu, baki akhir",
   secProducts:"Racun", secProductsNote:"Maksimum 4 pada satu masa. Pastikan racun boleh dicampur sebelum mencampurnya.",
   prodName:"Nama racun", unnamed:"Racun",
-  basisArea:"Se-ekar", basisTank:"Label setangki", basisRatio:"Tukar pencairan darat",
+  basisArea:"Se-ekar", basisTank:"Label setangki", basisRatio:"Pencairan darat",
   basisHelpArea:"Contoh label: 500 mL se-ekar. Masukkan kadar se-ekar pada label secara terus.",
   basisHelpTank:"Contoh label: 20 mL bagi 16 L air. Perisian menukarnya dahulu kepada kadar se-ekar.",
-  basisHelpRatio:"Contoh semburan darat: pencairan 1:1000. Perisian tidak menyalin 1:1000 terus ke tangki dron; ia menggunakan air biasa se-ekar untuk mengekalkan dos racun se-ekar.",
-  doseArea:"Kadar se-ekar", doseTank:"Dos label", doseRatio:"Pencairan darat 1 :",
+  basisHelpRatio:"",
+  doseArea:"Kadar se-ekar", doseTank:"Dos label", doseRatio:"Nisbah pencairan 1 :",
   perTank:"per", water:"L air", btnAdd:"+ Tambah racun",
   secResult:"Senarai campuran", secResultNote:"Isi setiap tangki begini",
   loads:"muatan", perLoad:"per muatan", loadN:"Muatan {n}",
@@ -967,10 +970,8 @@ function renderProducts(){
       {label:t("basisRatio"),value:"ratio"}
     ],p.basis,function(v){ p.basis=v; save(); renderProducts(); renderResult(); });
     bWrap.appendChild(bChips);
-    var bh=document.createElement("p");
-    bh.className="basis-help";
-    bh.textContent=t(p.basis==="area"?"basisHelpArea":(p.basis==="tank"?"basisHelpTank":"basisHelpRatio"));
-    bWrap.appendChild(bh);
+    var help=t(p.basis==="area"?"basisHelpArea":(p.basis==="tank"?"basisHelpTank":"basisHelpRatio"));
+    if(help){ var bh=document.createElement("p"); bh.className="basis-help"; bh.textContent=help; bWrap.appendChild(bh); }
     d.appendChild(bWrap);
 
     if(p.basis==="ratio"){
@@ -1006,7 +1007,10 @@ function renderProducts(){
     }
     list.appendChild(d);
   });
-  $("convField").classList.toggle("hidden",!S.products.some(function(p){ return p.basis==="tank"||p.basis==="ratio"; }));
+  var hasRatio=S.products.some(function(p){ return p.basis==="ratio"; });
+  var needsConv=hasRatio||S.products.some(function(p){ return p.basis==="tank"; });
+  $("convField").classList.toggle("hidden",!needsConv);
+  $("convHint").textContent=t(hasRatio?"hintConvRatio":"hintConv");
   $("addProd").style.display = S.products.length>=4 ? "none":"block";
 }
 
