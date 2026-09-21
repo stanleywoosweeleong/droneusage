@@ -123,6 +123,13 @@ input.bad{border-color:var(--red);background:var(--red-soft)}
 .chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
 .chip:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 .chips.grow .chip{flex:1 1 0;min-width:74px;text-align:center}
+.basis-chips.chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.basis-chips.chips .chip{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;min-width:0;min-height:52px;padding:7px 4px;
+  font-size:.86em;line-height:1.2;overflow-wrap:break-word;
+}
+html[lang="zh"] .basis-chips .chip{white-space:nowrap}
 
 .row{display:flex;gap:8px;align-items:stretch}
 .row > .grow{flex:1 1 auto;min-width:0}
@@ -1017,7 +1024,7 @@ function renderProducts(){
     d.appendChild(top);
 
     var bWrap=document.createElement("div"); bWrap.className="field";
-    var bChips=document.createElement("div"); bChips.className="chips grow";
+    var bChips=document.createElement("div"); bChips.className="chips grow basis-chips";
     chipRow(bChips,[
       {label:t("basisArea"),value:"area"},
       {label:t("basisTank"),value:"tank"},
