@@ -1,6 +1,6 @@
 /* 无人机配药 · DroneDose — service worker
    Network-first. Bump CACHE on every deploy. */
-const CACHE = "dronedose-v28";
+const CACHE = "dronedose-v29";
 const ASSETS = [
   "./",
   "./index.html",

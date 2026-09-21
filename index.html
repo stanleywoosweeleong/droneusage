@@ -16,8 +16,9 @@
 :root{
   --ink:#0E2233;
   --ink-2:#2B4356;
-  --paper:#EEF1F4;
-  --card:#FFFFFF;
+  --paper:#F1EEE7;
+  --card:#FAF8F3;
+  --control:#FFFCF7;
   --line:#C3CED8;
   --line-strong:#8FA3B3;
   --blue:#12527A;
@@ -75,7 +76,7 @@ header{
   display:flex;align-items:center;gap:12px;
 }
 .update-toast span{flex:1;font-weight:700}
-.update-toast button{min-height:44px;padding:8px 12px;font-family:inherit;font-size:.9em;font-weight:700;background:#fff;color:var(--ink);border:0;border-radius:var(--radius);cursor:pointer}
+.update-toast button{min-height:44px;padding:8px 12px;font-family:inherit;font-size:.9em;font-weight:700;background:var(--control);color:var(--ink);border:0;border-radius:var(--radius);cursor:pointer}
 
 /* ---------- blocks ---------- */
 section{
@@ -88,7 +89,7 @@ section{
 .sec-head{
   padding:12px 14px 10px;
   border-bottom:1px solid var(--line);
-  background:#F7F9FB;
+  background:#F5F2EC;
 }
 .sec-title{font-size:1.02em;font-weight:700;margin:0}
 .sec-note{font-size:.82em;font-weight:500;color:var(--ink-2);margin:3px 0 0}
@@ -103,8 +104,8 @@ label.lab{display:block;font-size:.94em;font-weight:700;margin-bottom:7px}
 .key-badge{display:inline-block;margin-left:6px;padding:2px 6px;background:var(--blue);color:#fff;font-size:.72em;font-weight:800;vertical-align:2px}
 .basis-help{margin:7px 0 0;padding:8px 10px;background:var(--blue-soft);border-left:4px solid var(--blue);color:#0A2E45;font-size:.82em;font-weight:600;line-height:1.4}
 .load-choice{border-top:2px solid var(--line);padding-top:14px;margin-top:14px}
-.model-picker.model-picker{border:2px solid var(--line-strong);border-radius:var(--radius);background:#fff}
-.model-picker summary{padding:11px 12px;font-size:1.02em;background:#F2F5F8}
+.model-picker.model-picker{border:2px solid var(--line-strong);border-radius:var(--radius);background:var(--card)}
+.model-picker summary{padding:11px 12px;font-size:1.02em;background:#F5F2EC}
 .model-picker summary::after{color:var(--ink)}
 .model-picker-body{padding:12px;border-top:1px solid var(--line)}
 
@@ -112,7 +113,7 @@ label.lab{display:block;font-size:.94em;font-weight:700;margin-bottom:7px}
 input[type=number],input[type=text]{
   width:100%;
   font-family:inherit;font-size:1.06em;font-weight:600;
-  color:var(--ink);background:#fff;
+  color:var(--ink);background:var(--control);
   border:2px solid var(--line-strong);border-radius:var(--radius);
   padding:11px 12px;
   font-variant-numeric:tabular-nums;
@@ -127,7 +128,7 @@ input.bad{border-color:var(--red);background:var(--red-soft)}
 .chip{
   font-family:inherit;font-size:.94em;font-weight:600;
   padding:10px 12px;min-height:44px;
-  background:#fff;color:var(--ink);
+  background:var(--control);color:var(--ink);
   border:2px solid var(--line-strong);border-radius:var(--radius);
   cursor:pointer;flex:0 0 auto;
 }
@@ -148,18 +149,18 @@ html[lang="zh"] .basis-chips .chip{white-space:nowrap}
   display:flex;align-items:center;padding:0 12px;
   border:2px solid var(--line-strong);border-left:none;
   border-radius:0 var(--radius) var(--radius) 0;
-  background:#F2F5F8;font-weight:700;font-size:.96em;white-space:nowrap;
+  background:#F5F2EC;font-weight:700;font-size:.96em;white-space:nowrap;
 }
 .row.joined input{border-radius:var(--radius) 0 0 var(--radius)}
 
 /* ---------- product cards ---------- */
 .prod{
   border:2px solid var(--line);border-radius:var(--radius);
-  padding:12px;margin-bottom:12px;background:#FBFCFD;
+  padding:12px;margin-bottom:12px;background:#F7F4EE;
 }
 .prod-top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .prod-top .grow{flex:1}
-.recipe-row{border:1px solid var(--line);border-radius:var(--radius);padding:10px;margin-top:8px;background:#fff}
+.recipe-row{border:1px solid var(--line);border-radius:var(--radius);padding:10px;margin-top:8px;background:var(--card)}
 .recipe-name{font-weight:800}
 .recipe-meta{font-size:.86em;color:var(--ink-soft);margin:3px 0 8px}
 .recipe-actions{display:flex;gap:8px}
@@ -167,7 +168,7 @@ html[lang="zh"] .basis-chips .chip{white-space:nowrap}
 .icon-btn{
   flex:0 0 auto;width:44px;height:44px;
   border:2px solid var(--line-strong);border-radius:var(--radius);
-  background:#fff;color:var(--red);font-size:1.2em;font-weight:700;
+  background:var(--control);color:var(--red);font-size:1.2em;font-weight:700;
   font-family:inherit;cursor:pointer;line-height:1;
 }
 .btn{
@@ -175,7 +176,7 @@ html[lang="zh"] .basis-chips .chip{white-space:nowrap}
   font-family:inherit;font-size:1em;font-weight:700;
   padding:13px;min-height:48px;
   border-radius:var(--radius);cursor:pointer;
-  border:2px solid var(--ink);background:#fff;color:var(--ink);
+  border:2px solid var(--ink);background:var(--control);color:var(--ink);
 }
 .btn.solid{background:var(--ink);color:#fff}
 .btn:active{transform:translateY(1px)}
@@ -243,7 +244,7 @@ details[open] summary::after{content:"–"}
 
 table{width:100%;border-collapse:collapse;font-size:.95em}
 th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
-th{font-weight:700;background:#F2F5F8}
+th{font-weight:700;background:#F5F2EC}
 td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
 
 /* ---------- language gate ---------- */
@@ -257,7 +258,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
 #gate p{margin:0 0 18px;color:#A9C2D4;font-size:1em;font-weight:500}
 #gate button{
   width:100%;padding:18px;font-size:1.15em;font-weight:700;
-  font-family:inherit;background:#fff;color:var(--ink);
+  font-family:inherit;background:var(--control);color:var(--ink);
   border:none;border-radius:var(--radius);cursor:pointer;text-align:left;
 }
 #gate button span{display:block;font-size:.72em;font-weight:600;color:var(--ink-2);margin-top:2px}
@@ -1440,7 +1441,7 @@ if(S.lang){
 }
 
 /* Notify installed users without discarding their current inputs. */
-var APP_VERSION="v28", VERSION_KEY="dronedose.version", updateToastMode="";
+var APP_VERSION="v29", VERSION_KEY="dronedose.version", updateToastMode="";
 function renderUpdateToast(){
   if(!updateToastMode) return;
   $("updateMessage").textContent=t(updateToastMode==="ready"?"updateReady":"updateDone");
