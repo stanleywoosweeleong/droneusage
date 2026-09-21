@@ -1,7 +1,7 @@
 /* 无人机药量计算 · DroneDose — service worker
    Network-first with a timeout. Bump CACHE here AND APP_VERSION in
    index.html on every deploy. */
-const CACHE = "dronedose-v32";
+const CACHE = "dronedose-v33";
 const NETWORK_TIMEOUT_MS = 3000; /* weak orchard signal: fall back to cache instead of hanging */
 const ASSETS = [
   "./",
