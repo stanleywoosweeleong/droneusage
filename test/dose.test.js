@@ -34,7 +34,7 @@ function fill(s,o){ var k; for(k in o){ s=s.split("{"+k+"}").join(o[k]); } retur
 `;
 
 const API = new Function(prelude + core +
-  '\nreturn {compute:compute, fmt:fmt, amount:amount, num:num, setAreaUnit:setAreaUnit, displayRate:displayRate, rateFromDisplay:rateFromDisplay, getS:function(){return S;}, setS:function(x){S=x;}};')();
+  '\nreturn {compute:compute, fmt:fmt, amount:amount, num:num, setAreaUnit:setAreaUnit, displayRate:displayRate, rateFromDisplay:rateFromDisplay, displayConv:displayConv, getS:function(){return S;}, setS:function(x){S=x;}};')();
 const compute = API.compute, amount = API.amount, setS = API.setS;
 
 let pass = 0, fail = 0;
@@ -185,6 +185,57 @@ S2({ area: 2, rate: 20, tank: 40 }); r = compute();
 check('exactly one tankful does not become two', r.n, 1);
 S2({ area: 2.0001, rate: 20, tank: 40 }); r = compute();
 check('a hair over one tankful becomes two', r.n, 2);
+
+group('12. Hectare jobs that are an exact number of tankfuls');
+/* Regression: two different acre/hectare constants once added a phantom load
+   to every exact-multiple hectare job (1 ha x 40 L/ha on a T10 gave 6, not 5). */
+let haWrong = 0, haCases = 0;
+[8, 16, 20, 30, 40, 50, 70, 100].forEach(tank => [1, 2, 4, 5, 10, 20].forEach(ha => [15, 20, 30, 40, 50, 75].forEach(rHa => {
+  const want = ha * rHa / tank;
+  if (!Number.isInteger(want)) return;
+  haCases++;
+  S2({ tank: tank, areaUnit: 'ha', area: String(ha), split: 'full' });
+  API.getS().rate = API.rateFromDisplay(String(rHa));
+  const x = compute();
+  if (x.n !== want || x.partialLast || Math.abs(x.total - ha * rHa) > 1e-9) haWrong++;
+})));
+check('hectare sweep ran', haCases > 50, true);
+check('no phantom load in any exact-multiple hectare job', haWrong, 0);
+S2({ tank: 8, areaUnit: 'ha', area: '1' }); API.getS().rate = API.rateFromDisplay('40'); r = compute();
+check('1 ha x 40 L/ha on 8 L tank is 5 loads', r.n, 5);
+check('...of 8 L each', r.loads[0], 8, 1e-9);
+
+group('13. Last load shorter than the tank');
+S2({ split: 'full' }); r = compute();
+check('100 L into 40 L tanks flags a partial last load', r.partialLast, true);
+S2({ split: 'full', area: 3.975 }); r = compute();   /* 79.5 L: last load 39.5 L */
+check('39.5 L of 40 L still gets its own recipe', r.partialLast, true);
+check('...and the partial-load notice', r.warnings.some(w => w.text.indexOf('PARTIAL') === 0), true);
+check('...and product still sums to the total', r.rows.reduce((a, x) => a + x.chem[0].base, 0), r.totals[0].base, 1e-9);
+S2({ split: 'full', area: 4 }); r = compute();
+check('exact tankfuls are not partial', r.partialLast, false);
+S2({ split: 'even' }); r = compute();
+check('even split is never partial', r.partialLast, false);
+
+group('14. Conventional volume follows the area unit');
+S2({ areaUnit: 'ha', conv: 800 });
+check('800 L/acre is shown as L/ha', API.displayConv(), 800 / 0.404685642, 1e-6);
+check('an L/ha entry is stored per acre', API.rateFromDisplay(800 / 0.404685642), 800, 1e-9);
+
+group('15. Ratio labels for powders');
+S2({ products: [{ name: 'WP', basis: 'ratio', unit: 'g', dose: '', ratio: '1000' }] }); r = compute();
+check('powder ratio is reported as a solid', r.totals[0].liquid, false);
+check('1:1000 at 800 L/acre is 800 g/acre', r.totals[0].base, 800 * 5, 1e-9);
+check('a powder takes no water volume', r.rows[0].water, r.rows[0].L, 1e-9);
+S2({ products: [{ name: 'SC', basis: 'ratio', unit: 'ml', dose: '', ratio: '1000' }] }); r = compute();
+check('liquid ratio stays liquid', r.totals[0].liquid, true);
+
+group('16. Number formatting never hides a dose');
+check('999.6 mL rounds into litres', amount(999.6, true), '1 L');
+check('999.4 mL stays millilitres', amount(999.4, true), '999 mL');
+check('a tiny dose is not printed as 0', API.fmt(0.0004), '0.0004');
+check('three significant figures below 0.1', API.fmt(0.012345), '0.0123');
+check('zero is still 0', API.fmt(0), '0');
 
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);
