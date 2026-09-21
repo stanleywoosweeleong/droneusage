@@ -328,6 +328,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
           <input class="grow" type="number" id="area" inputmode="decimal" min="0" step="0.1">
           <div class="suffix" id="areaSuffix">英亩</div>
         </div>
+        <div id="areaMsg" aria-live="polite"></div>
       </div>
 
       <div class="field critical-field">
@@ -388,7 +389,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
         <label class="lab" for="conv" data-t="labConv">常规喷雾量</label>
         <div class="row joined">
           <input class="grow" type="number" id="conv" inputmode="decimal" min="0" step="10">
-          <div class="suffix">L / <span data-t="unAcre">英亩</span></div>
+          <div class="suffix" id="convSuffix">L / 英亩</div>
         </div>
         <p class="hint" id="convHint" data-t="hintConv">用实际常规喷雾量，把标签每桶用量换算成每英亩药量。</p>
       </div>
@@ -482,7 +483,9 @@ var MODELS = [
 var I18N = {
 zh:{
   code:"中文", title:"无人机药量计算", sub:"以大疆机型为基准",
-  updateReady:"新版本已下载。重新载入以更新软件。", updateReload:"重新载入", updateDone:"软件已更新。", updateDismiss:"知道了",
+  updateReady:"新版本已下载。重新载入以更新软件。", updateReload:"重新载入", updateDone:"软件已更新。", updateDismiss:"知道了", offlineFail:"离线功能尚未就绪：软件文件未能保存到本机。请在有网络时重新打开一次。",
+  areaConverted:"已换算：{from} ＝ {to}。如果你原本输入的数字就是{unit}，请重新输入面积。",
+  ratioLiquid:"液体药剂 (mL)", ratioSolid:"粉剂／颗粒 (g)", recipeBroken:"这个配方的数据已损坏，无法载入。请删除后重新保存。",
   secInputs:"喷药设定", secInputsNote:"计算所需的全部输入都在这里",
   labDrone:"无人机机型与药桶容量", custom:"自定",
   labCustomTank:"自定药桶容量",
@@ -552,7 +555,9 @@ zh:{
 },
 en:{
   code:"EN", title:"DroneDose", sub:"DJI models as the baseline",
-  updateReady:"A new version is ready. Reload to update the app.", updateReload:"Reload", updateDone:"App updated.", updateDismiss:"OK",
+  updateReady:"A new version is ready. Reload to update the app.", updateReload:"Reload", updateDone:"App updated.", updateDismiss:"OK", offlineFail:"Offline use is not ready: the app files could not be saved on this device. Open the app once more while online.",
+  areaConverted:"Converted: {from} = {to}. If the number you typed was already in {unit}, enter the area again.",
+  ratioLiquid:"Liquid product (mL)", ratioSolid:"Powder / granule (g)", recipeBroken:"This recipe\u2019s data is damaged and cannot be loaded. Delete it and save it again.",
   secInputs:"Spray setup", secInputsNote:"Every input the calculation needs sits here",
   labDrone:"Drone model and tank capacity", custom:"Custom",
   labCustomTank:"Custom tank capacity",
@@ -622,7 +627,9 @@ en:{
 },
 ms:{
   code:"BM", title:"DroneDose", sub:"Berasaskan model DJI",
-  updateReady:"Versi baharu sudah tersedia. Muat semula untuk mengemas kini aplikasi.", updateReload:"Muat semula", updateDone:"Aplikasi telah dikemas kini.", updateDismiss:"OK",
+  updateReady:"Versi baharu sudah tersedia. Muat semula untuk mengemas kini aplikasi.", updateReload:"Muat semula", updateDone:"Aplikasi telah dikemas kini.", updateDismiss:"OK", offlineFail:"Penggunaan luar talian belum sedia: fail aplikasi tidak dapat disimpan pada peranti ini. Buka aplikasi sekali lagi semasa ada internet.",
+  areaConverted:"Telah ditukar: {from} = {to}. Jika nombor yang anda taip memang dalam {unit}, masukkan keluasan sekali lagi.",
+  ratioLiquid:"Racun cecair (mL)", ratioSolid:"Serbuk / butiran (g)", recipeBroken:"Data resipi ini rosak dan tidak dapat dimuat. Padam dan simpan semula.",
   secInputs:"Tetapan semburan", secInputsNote:"Semua maklumat yang diperlukan ada di sini",
   labDrone:"Model dron dan isipadu tangki", custom:"Sendiri",
   labCustomTank:"Isipadu tangki sendiri",
@@ -719,8 +726,17 @@ function load(){
       for(k in d){ if(Object.prototype.hasOwnProperty.call(o,k)) d[k]=o[k]; }
     }
     var prefRaw=localStorage.getItem(PREF_KEY), prefs=prefRaw?JSON.parse(prefRaw):{};
-    ["lang","size","model"].forEach(function(key){ if(Object.prototype.hasOwnProperty.call(prefs,key)) d[key]=prefs[key]; });
-    if(!raw) d.tank=modelTank(d.model);
+    ["lang","size"].forEach(function(key){ if(Object.prototype.hasOwnProperty.call(prefs,key)) d[key]=prefs[key]; });
+    if(!raw){
+      /* New session: restore the remembered drone. An open session keeps its own
+         model + tank pair, so another tab can never produce "T100 · 40 L". */
+      if(Object.prototype.hasOwnProperty.call(prefs,"model")) d.model=prefs.model;
+      d.tank = d.model==="custom" ? (num(prefs.tank)>0?prefs.tank:"") : modelTank(d.model);
+    }
+    if(d.model!=="custom"){
+      if(modelTank(d.model)==="") { d.model=DEFAULT.model; d.tank=modelTank(d.model); }
+      else if(Math.abs(num(d.tank)-modelTank(d.model))>1e-9) d.tank=modelTank(d.model);
+    }
     if(!Array.isArray(d.products)||!d.products.length) d.products=clone(DEFAULT.products);
     d.products.forEach(function(p){ if(p.doseAreaUnit!=="ha") p.doseAreaUnit="ac"; });
     if(d.areaUnit!=="ac"&&d.areaUnit!=="ha"){
@@ -733,7 +749,7 @@ function load(){
 }
 function save(){
   try{
-    localStorage.setItem(PREF_KEY,JSON.stringify({lang:S.lang,size:S.size,model:S.model}));
+    localStorage.setItem(PREF_KEY,JSON.stringify({lang:S.lang,size:S.size,model:S.model,tank:S.model==="custom"?S.tank:""}));
     sessionStorage.setItem(SESSION_KEY,JSON.stringify(S));
   }catch(e){}
 }
@@ -747,27 +763,43 @@ function num(v){ var n=parseFloat(v); return isFinite(n)?n:0; }
 function fmt(n){
   if(!isFinite(n)) return "0";
   var a=Math.abs(n), d;
-  if(a>=1000) d=0; else if(a>=100) d=0; else if(a>=10) d=1; else if(a>=1) d=2; else d=3;
+  if(a>=100) d=0; else if(a>=10) d=1; else if(a>=1) d=2; else if(a>=0.1||a===0) d=3;
+  else d=Math.min(9,2-Math.floor(Math.log(a)/Math.LN10)); /* keep 3 significant figures so a tiny dose never prints as 0 */
   var s=n.toFixed(d);
   if(s.indexOf(".")>-1) s=s.replace(/0+$/,"").replace(/\.$/,"");
   return s;
 }
 /* present an amount held in base units (mL or g) in the friendliest unit */
 function amount(base,liquid){
-  if(base>=1000) return fmt(base/1000)+(liquid?" L":" kg");
+  /* decide the unit on the rounded figure, so 999.6 mL prints as 1 L, not 1000 mL */
+  if(Number(fmt(base))>=1000) return fmt(base/1000)+(liquid?" L":" kg");
   return fmt(base)+(liquid?" mL":" g");
 }
 var TO_BASE={ml:1,l:1000,g:1,kg:1000};
 var HA_PER_ACRE=0.404685642;
 function isLiquidUnit(u){ return u==="ml"||u==="l"; }
+var areaConversion=null; /* last unit conversion, shown until the area is retyped */
 function setAreaUnit(unit){
   if(unit===S.areaUnit) return;
+  areaConversion=null;
   if(S.area!=="" && num(S.area)>0){
-    var converted=unit==="ha"?num(S.area)*HA_PER_ACRE:num(S.area)/HA_PER_ACRE;
+    var before=num(S.area);
+    var converted=unit==="ha"?before*HA_PER_ACRE:before/HA_PER_ACRE;
     S.area=String(Number(converted.toPrecision(12)));
+    areaConversion={from:before,fromUnit:S.areaUnit,to:num(S.area),toUnit:unit};
   }
   S.areaUnit=unit;
 }
+/* One constant for every acre<->hectare conversion. A second hard-coded
+   2.471054 used to disagree with HA_PER_ACRE in the 8th digit, which pushed
+   exact-multiple hectare jobs over Math.ceil and added a phantom load. */
+function toAcres(v,unit){ return unit==="ha"?num(v)/HA_PER_ACRE:num(v); }
+function areaAcres(){ return toAcres(S.area,S.areaUnit); }
+function loadCount(total,tank){ return Math.max(1,Math.ceil(total/tank*(1-1e-9))); }
+/* the last load counts as partial whenever it is measurably short of the tank */
+function isPartial(load,tank){ return load<tank*(1-1e-6); }
+function displayConv(){ return S.areaUnit==="ha"?num(S.conv)/HA_PER_ACRE:num(S.conv); }
+function displayConvText(){ return num(S.conv)>0?fmt(displayConv()):""; }
 function displayRate(){ return S.areaUnit==="ha"?num(S.rate)/HA_PER_ACRE:num(S.rate); }
 function displayRateText(){ return num(S.rate)>0?fmt(displayRate()):""; }
 function rateFromDisplay(v){ return S.areaUnit==="ha"?num(v)*HA_PER_ACRE:num(v); }
@@ -781,9 +813,7 @@ function compute(){
   var r={ok:false,errors:[],warnings:[]};
   var tank=num(S.tank), rate=num(S.rate), conv=num(S.conv);
 
-  var acres;
-  if(S.areaUnit==="ac") acres=num(S.area);
-  else acres=num(S.area)*2.471054;
+  var acres=areaAcres();
 
   if(acres<=0) r.errors.push(t("errArea"));
   if(rate<=0)  r.errors.push(t("errRate"));
@@ -792,7 +822,7 @@ function compute(){
   var items=[], needConv=false, hasRatio=false, i, p, perAcre, liquid, base;
   for(i=0;i<S.products.length;i++){
     p=S.products[i];
-    liquid = p.basis==="ratio" ? true : isLiquidUnit(p.unit);
+    liquid = isLiquidUnit(p.unit);
     perAcre=0;
     if(p.basis==="area"){
       base=num(p.dose)*TO_BASE[p.unit];
@@ -833,7 +863,7 @@ function compute(){
   if(liquidPerAcre>=rate){ r.errors.push(t("errTankOverflow")); return r; }
 
   var total=acres*rate;
-  var n=Math.max(1,Math.ceil(total/tank - 1e-9));
+  var n=loadCount(total,tank);
   var loads=[], j;
   if(S.split==="even"){
     for(j=0;j<n;j++) loads.push(total/n);
@@ -842,6 +872,7 @@ function compute(){
     loads.push(total-tank*(n-1));
   }
 
+  r.partialLast = S.split==="full" && n>1 && isPartial(loads[n-1],tank);
   r.ok=true; r.acres=acres; r.rate=rate; r.tank=tank; r.total=total;
   r.n=n; r.loads=loads; r.items=items; r.conv=conv;
   r.mult = conv>0 ? conv/rate : 0;
@@ -871,10 +902,7 @@ function compute(){
   var volPct = r.rows[0].liquidMl/1000/r.rows[0].L*100;
   if(volPct>10) r.warnings.push({tone:"amber", text:fill(t("warnVolume"),{p:fmt(volPct)})});
 
-  if(S.split==="full" && n>1){
-    var last=loads[n-1];
-    if(last < tank*0.98) r.warnings.push({tone:"blue", text:fill(t("warnPartial"),{v:fmt(last)})});
-  }
+  if(r.partialLast) r.warnings.push({tone:"blue", text:fill(t("warnPartial"),{v:fmt(loads[n-1])})});
   return r;
 }
 
@@ -950,6 +978,15 @@ function refreshChips(){
   renderSplitChips();
 }
 
+function renderAreaMsg(){
+  var el=$("areaMsg"), c=areaConversion;
+  if(!c){ el.innerHTML=""; return; }
+  var name=function(u){ return (u==="ha"?t("uHa"):t("unAcre")).toLowerCase(); };
+  el.innerHTML='<div class="note amber">'+esc(fill(t("areaConverted"),{
+    from:fmt(c.from)+" "+name(c.fromUnit), to:fmt(c.to)+" "+name(c.toUnit), unit:name(c.toUnit)
+  }))+'</div>';
+}
+
 function renderRateUnits(){
   $("rateSuffix").textContent="L / "+(S.areaUnit==="ha"?t("uHa"):t("unAcre"));
   setVal("rate",displayRateText());
@@ -963,14 +1000,12 @@ function renderCalUnits(){
 }
 
 function splitOptions(){
-  var acres;
-  if(S.areaUnit==="ac") acres=num(S.area);
-  else acres=num(S.area)*2.471054;
+  var acres=areaAcres();
 
   var tank=num(S.tank), rate=num(S.rate), total=acres*rate;
   var even=t("splitEven"), full=t("splitFull");
   if(acres>0 && rate>0 && tank>0){
-    var n=Math.max(1,Math.ceil(total/tank - 1e-9));
+    var n=loadCount(total,tank);
     even += " · "+n+" × "+fmt(total/n)+" L";
     if(n===1){
       full += " · "+fmt(total)+" L";
@@ -1013,7 +1048,9 @@ function renderInputs(){
   renderSplitChips();
 
   setVal("tank",S.tank); setVal("area",S.area);
-  setVal("rate",displayRateText()); setVal("conv",S.conv);
+  setVal("rate",displayRateText()); setVal("conv",displayConvText());
+  $("convSuffix").textContent="L / "+(S.areaUnit==="ha"?t("uHa"):t("unAcre"));
+  renderAreaMsg();
   setVal("recipeName",S.recipeName||"");
   var profile=S.profile||DEFAULT.profile;
   setVal("profileName",profile.name); setVal("droplet",profile.droplet);
@@ -1059,6 +1096,12 @@ function renderProducts(){
       d.appendChild(numField("product-ratio-"+idx,t("doseRatio"),p.ratio,t("partsSpray"),function(v){
         p.ratio=v; save(); renderConversionPreviews(); renderResult();
       }));
+      var formChips=document.createElement("div"); formChips.className="chips grow";
+      formChips.style.marginBottom="10px";
+      chipRow(formChips,[
+        {label:t("ratioLiquid"),value:"ml"},{label:t("ratioSolid"),value:"g"}
+      ],isLiquidUnit(p.unit)?"ml":"g",function(v){ p.unit=v; save(); renderProducts(); renderResult(); });
+      d.appendChild(formChips);
       var preview=document.createElement("div");
       preview.className="note green conversion-preview hidden";
       preview.setAttribute("data-conversion-index",idx);
@@ -1126,7 +1169,7 @@ function renderConversionPreviews(){
     var ratio=p?num(p.ratio):0, conv=num(S.conv);
     if(ratio>0&&conv>0){
       var perAcre=(1000/ratio)*conv;
-      el.textContent=fill(t("convertedDose"),{v:amount(perAcre,true)});
+      el.textContent=fill(t("convertedDose"),{v:amount(perAcre,isLiquidUnit(p.unit))});
       el.classList.remove("hidden");
     }else{
       el.textContent="";
@@ -1159,7 +1202,8 @@ function renderRecipes(){
   if(!recipes.length){ var empty=document.createElement("p"); empty.className="hint"; empty.textContent=t("noRecipes"); list.appendChild(empty); return; }
   recipes.forEach(function(r){
     var row=document.createElement("div"); row.className="recipe-row";
-    var name=document.createElement("div"); name.className="recipe-name"; name.textContent=r.name; row.appendChild(name);
+    if(!r || typeof r!=="object") return;
+    var name=document.createElement("div"); name.className="recipe-name"; name.textContent=r.name||""; row.appendChild(name);
     var meta=document.createElement("div"); meta.className="recipe-meta";
     var date=new Date(r.savedAt); meta.textContent=fill(t("savedOn"),{date:isNaN(date.getTime())?"":date.toLocaleDateString()}); row.appendChild(meta);
     var actions=document.createElement("div"); actions.className="recipe-actions";
@@ -1174,6 +1218,10 @@ function renderRecipes(){
   });
 }
 function loadRecipe(r){
+  if(!r || !r.data || typeof r.data!=="object"){
+    $("recipeMsg").innerHTML='<div class="note red">'+esc(t("recipeBroken"))+'</div>';
+    return;
+  }
   var keepArea=S.area, keepAreaUnit=S.areaUnit;
   S.model=r.data.model||DEFAULT.model;
   S.tank=r.data.tank!==undefined?r.data.tank:modelTank(S.model);
@@ -1215,28 +1263,34 @@ function renderResult(){
   }
 
   /* hero */
-  h+='<div class="headline">'+r.n+' <span class="u">'+esc(t("loads"))+'</span> &nbsp;'+
-     fmt(r.loads[0])+' <span class="u">L '+esc(t("perLoad"))+'</span></div>';
+  if(r.partialLast){
+    h+='<div class="headline">'+r.n+' <span class="u">'+esc(t("loads"))+'</span> &nbsp;'+
+       (r.n-1)+' × '+fmt(r.tank)+' <span class="u">L</span> + '+fmt(r.loads[r.n-1])+' <span class="u">L</span></div>';
+  }else{
+    h+='<div class="headline">'+r.n+' <span class="u">'+esc(t("loads"))+'</span> &nbsp;'+
+       fmt(r.loads[0])+' <span class="u">L '+esc(t("perLoad"))+'</span></div>';
+  }
 
   /* tank glyphs */
   h+='<div class="tanks">';
   var show=Math.min(r.n,14), i;
   for(i=0;i<show;i++){
     var pc=Math.max(8,Math.round(r.loads[i]/r.tank*100));
-    var part = r.loads[i] < r.tank*0.98;
+    var part = isPartial(r.loads[i],r.tank);
     h+='<div class="tank'+(part?' part':'')+'"><i style="height:'+pc+'%"></i><b>'+(i+1)+'</b></div>';
   }
   h+='</div>';
   if(r.n>show) h+='<p class="sec-note" style="margin:4px 0 0">+'+(r.n-show)+'</p>';
 
   /* per-load recipe */
-  var uniq = S.split==="even" ? 1 : (r.n>1 && r.loads[r.n-1]<r.tank*0.98 ? 2 : 1);
+  var uniq = r.partialLast ? 2 : 1;
   for(i=0;i<uniq;i++){
     var idx = i===0?0:r.n-1;
     var row=r.rows[idx];
     h+='<div class="load">';
     h+='<div class="load-h">'+
-        (uniq===1 ? esc(t("perLoad"))+" · "+fmt(row.L)+" L" : esc(fill(t("loadN"),{n:idx+1}))+" · "+fmt(row.L)+" L")+
+        (uniq===1 ? esc(t("perLoad"))+" · "+fmt(row.L)+" L" :
+          esc(i===0 ? (r.n>2 ? fill(t("loadN"),{n:"1–"+(r.n-1)}) : fill(t("loadN"),{n:1})) : fill(t("loadN"),{n:r.n}))+" · "+fmt(row.L)+" L")+
         ' · '+esc(fill(t("covers"),{a:fmt(row.acres)}))+'</div>';
     h+='<div class="line water"><span class="k">'+esc(t("clearWater"))+'</span><span class="v">'+fmt(row.water)+' L</span></div>';
     row.chem.forEach(function(c){
@@ -1288,13 +1342,14 @@ function sheetText(){
   var L=[];
   L.push(t("title")+" — "+t("secResult"));
   L.push(fmt(r.acres)+" "+t("unAcre")+" · "+fmt(r.rate)+" L/"+t("unAcre")+" · "+fmt(r.total)+" L");
-  L.push(r.n+" "+t("loads")+" × "+fmt(r.loads[0])+" L");
+  if(r.partialLast) L.push(r.n+" "+t("loads")+": "+(r.n-1)+" × "+fmt(r.tank)+" L + "+fmt(r.loads[r.n-1])+" L");
+  else L.push(r.n+" "+t("loads")+" × "+fmt(r.loads[0])+" L");
   L.push("");
   var row=r.rows[0];
-  L.push(t("perLoad")+" ("+fmt(row.L)+" L):");
+  L.push((r.partialLast ? (r.n>2 ? fill(t("loadN"),{n:"1–"+(r.n-1)}) : fill(t("loadN"),{n:1})) : t("perLoad"))+" ("+fmt(row.L)+" L):");
   L.push("  "+t("clearWater")+": "+fmt(row.water)+" L");
   row.chem.forEach(function(c){ L.push("  "+c.name+": "+amount(c.base,c.liquid)); });
-  if(S.split==="full" && r.n>1 && r.loads[r.n-1]<r.tank*0.98){
+  if(r.partialLast){
     var last=r.rows[r.n-1];
     L.push("");
     L.push(fill(t("loadN"),{n:r.n})+" ("+fmt(last.L)+" L):");
@@ -1326,13 +1381,15 @@ function bindNum(id,key){
   $(id).addEventListener("input",function(){
     S[key]=$(id).value;
     if(key==="rate"||key==="tank") refreshChips();
-    else if(key==="area") renderSplitChips();
-    else if(key==="conv") renderConversionPreviews();
+    else if(key==="area"){ areaConversion=null; renderAreaMsg(); renderSplitChips(); }
     save(); renderResult();
   });
 }
 bindNum("tank","tank"); bindNum("area","area");
-bindNum("conv","conv");
+/* conv is held per acre, like rate; the field shows it in the chosen area unit */
+$("conv").addEventListener("input",function(){
+  S.conv=rateFromDisplay($("conv").value); save(); renderConversionPreviews(); renderResult();
+});
 $("rate").addEventListener("input",function(){
   S.rate=rateFromDisplay($("rate").value); save(); renderSplitChips(); renderResult();
 });
@@ -1360,9 +1417,9 @@ $("saveRecipe").addEventListener("click",function(){
     msg.innerHTML='<div class="note red">'+esc(t("recipeIncomplete"))+'</div>'; return;
   }
   var recipes=getRecipes(), match=null;
-  for(var i=0;i<recipes.length;i++) if(recipes[i].name.toLowerCase()===name.toLowerCase()) match=recipes[i];
+  for(var i=0;i<recipes.length;i++) if(recipes[i] && String(recipes[i].name||"").toLowerCase()===name.toLowerCase()) match=recipes[i];
   var record={id:match?match.id:String(Date.now()),name:name,savedAt:new Date().toISOString(),data:recipeData()};
-  recipes=recipes.filter(function(x){ return x.id!==record.id; }); recipes.unshift(record); putRecipes(recipes);
+  recipes=recipes.filter(function(x){ return x && x.id!==record.id; }); recipes.unshift(record); putRecipes(recipes);
   msg.innerHTML='<div class="note green">'+esc(t("recipeSaved"))+'</div>'; renderRecipes();
 });
 
@@ -1403,7 +1460,7 @@ function fallbackCopy(txt){
 function calUpdate(){
   var L=num($("calL").value), a=num($("calA").value), out=$("calOut");
   if(L>0 && a>0){
-    var acres=S.calUnit==="ha"?a*2.471054:a;
+    var acres=toAcres(a,S.calUnit);
     var rateAc=L/acres;
     var shown=S.areaUnit==="ha"?rateAc/HA_PER_ACRE:rateAc;
     var unit="L / "+(S.areaUnit==="ha"?t("uHa"):t("unAcre"));
@@ -1452,10 +1509,10 @@ if(S.lang){
 }
 
 /* Notify installed users without discarding their current inputs. */
-var APP_VERSION="v31", VERSION_KEY="dronedose.version", updateToastMode="";
+var APP_VERSION="v32", VERSION_KEY="dronedose.version", updateToastMode="";
 function renderUpdateToast(){
   if(!updateToastMode) return;
-  $("updateMessage").textContent=t(updateToastMode==="ready"?"updateReady":"updateDone");
+  $("updateMessage").textContent=t(updateToastMode==="ready"?"updateReady":(updateToastMode==="offline"?"offlineFail":"updateDone"));
   $("updateAction").textContent=t(updateToastMode==="ready"?"updateReload":"updateDismiss");
 }
 function showUpdateToast(mode){
@@ -1485,8 +1542,11 @@ if("serviceWorker" in navigator){
         if(!worker) return;
         worker.addEventListener("statechange",function(){
           if(worker.state==="installed" && navigator.serviceWorker.controller) showUpdateToast("ready");
+          /* install failed (files could not be cached) and nothing older is serving: say so */
+          if(worker.state==="redundant" && !navigator.serviceWorker.controller) showUpdateToast("offline");
         });
       }
+      watch(reg.installing);
       if(reg.waiting && navigator.serviceWorker.controller) showUpdateToast("ready");
       reg.addEventListener("updatefound",function(){ watch(reg.installing); });
       function checkForUpdate(){ reg.update().catch(function(){}); }

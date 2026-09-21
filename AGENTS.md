@@ -19,7 +19,7 @@ breaks the deployment workflow it was designed around.
 | File | Role |
 |---|---|
 | `index.html` | The entire app — markup, CSS, i18n strings, logic |
-| `sw.js` | Service worker, network-first |
+| `sw.js` | Service worker, network-first with 3 s timeout; only caches good same-origin responses; install fails loudly |
 | `manifest.webmanifest` | PWA manifest |
 | `icon-*.png` | App icons |
 | `make_icons.py` | Regenerates the icons (Pillow) |
@@ -32,15 +32,16 @@ node test/dose.test.js
 ```
 
 No dependencies. It extracts the calculation core from `index.html` and runs
-47 checks. It must pass. If you change the banner comments
+its checks (the count is printed at the end). It must pass. If you change the banner comments
 `/* ===================== number helpers` or `/* ===================== rendering`,
 update the markers at the top of the test.
 
 If you change dosing behaviour deliberately, change the test in the same
 commit and say why. Do not delete a failing check to make the suite green.
 
-**Bump `CACHE` in `sw.js` on every deploy**, or returning users keep the old
-cached build.
+**Bump `CACHE` in `sw.js` AND `APP_VERSION` in `index.html` on every deploy**
+(same number). `CACHE` replaces the old cached build; `APP_VERSION` drives the
+"updated" notice.
 
 ## Correctness rules — these are the point of the app
 
@@ -71,6 +72,14 @@ cached build.
 5. **Show the concentration multiplier.** Farmers must see how much stronger
    the drone mix is than their usual spray, with the advice to test a few
    trees first. Do not quietly remove this.
+
+6. **One acre/hectare constant.** All conversions go through `HA_PER_ACRE`
+   (`toAcres`, `rateFromDisplay`). Never hard-code 2.471054 — a second constant
+   once added a phantom load to every exact-multiple hectare job.
+
+7. **Rate and conventional volume are stored per acre** and shown in the
+   chosen area unit. Switching the unit converts the typed area and says so
+   in a visible notice; keep the notice.
 
 ## UI rules — owner preferences, not negotiable defaults
 
