@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>无人机配药 · DroneDose</title>
+<title>无人机药量计算 · DroneDose</title>
 <meta name="theme-color" content="#0E2233">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="DroneDose 无人机剂量计算机">
+<meta name="apple-mobile-web-app-title" content="无人机药量计算">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 :root{
@@ -271,7 +271,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
 <body>
 
 <div id="gate">
-  <h1>无人机配药 · DroneDose</h1>
+  <h1>无人机药量计算 · DroneDose</h1>
   <p>请选择语言 / Choose language / Pilih bahasa</p>
   <button data-setlang="zh">中文<span>农用无人机药量计算</span></button>
   <button data-setlang="en">English<span>Agricultural drone dosage calculator</span></button>
@@ -280,7 +280,7 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
 
 <header>
   <div class="hgroup">
-    <div class="htitle" id="appTitle">无人机配药</div>
+    <div class="htitle" id="appTitle">无人机药量计算</div>
     <div class="hsub" id="appSub">以大疆机型为基准</div>
   </div>
   <button class="hbtn" id="langBtn" aria-label="language">中文</button>
@@ -481,7 +481,7 @@ var MODELS = [
 /* ===================== i18n ===================== */
 var I18N = {
 zh:{
-  code:"中文", title:"无人机配药", sub:"以大疆机型为基准",
+  code:"中文", title:"无人机药量计算", sub:"以大疆机型为基准",
   updateReady:"新版本已下载。重新载入以更新软件。", updateReload:"重新载入", updateDone:"软件已更新。", updateDismiss:"知道了",
   secInputs:"喷药设定", secInputsNote:"计算所需的全部输入都在这里",
   labDrone:"无人机机型与药桶容量", custom:"自定",
@@ -884,7 +884,7 @@ function renderChrome(){
   $("appTitle").textContent=t("title");
   $("appSub").textContent=t("sub");
   $("langBtn").textContent=t("code");
-  document.title=(S.lang==="zh"?"无人机配药 · DroneDose":"DroneDose");
+  document.title=(S.lang==="zh"?"无人机药量计算 · DroneDose":"DroneDose");
   renderUpdateToast();
   var nodes=document.querySelectorAll("[data-t]"), i, k;
   for(i=0;i<nodes.length;i++){
@@ -1452,7 +1452,7 @@ if(S.lang){
 }
 
 /* Notify installed users without discarding their current inputs. */
-var APP_VERSION="v30", VERSION_KEY="dronedose.version", updateToastMode="";
+var APP_VERSION="v31", VERSION_KEY="dronedose.version", updateToastMode="";
 function renderUpdateToast(){
   if(!updateToastMode) return;
   $("updateMessage").textContent=t(updateToastMode==="ready"?"updateReady":"updateDone");
