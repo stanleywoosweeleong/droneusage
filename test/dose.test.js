@@ -34,7 +34,7 @@ function fill(s,o){ var k; for(k in o){ s=s.split("{"+k+"}").join(o[k]); } retur
 `;
 
 const API = new Function(prelude + core +
-  '\nreturn {compute:compute, fmt:fmt, amount:amount, num:num, setS:function(x){S=x;}};')();
+  '\nreturn {compute:compute, fmt:fmt, amount:amount, num:num, setAreaUnit:setAreaUnit, displayRate:displayRate, rateFromDisplay:rateFromDisplay, getS:function(){return S;}, setS:function(x){S=x;}};')();
 const compute = API.compute, amount = API.amount, setS = API.setS;
 
 let pass = 0, fail = 0;
@@ -104,6 +104,18 @@ S2({ areaUnit: "ha", area: 2 }); r = compute();
 check('2 ha to acres', r.acres, 4.942108, 1e-6);
 S2({ products: [{ name: "Per hectare", basis: "area", unit: "ml", dose: "500", doseAreaUnit: "ha", labelTank: 16, ratio: "" }] }); r = compute();
 check('500 mL/ha converts to mL/acre', r.totals[0].perL * r.rate, 500 * 0.404685642, 1e-6);
+S2({});
+const beforeUnitChange = compute();
+API.setAreaUnit('ha');
+check('changing to hectares updates area unit', API.getS().areaUnit, 'ha');
+check('changing to hectares converts entered area', Number(API.getS().area), 5 * 0.404685642, 1e-8);
+check('changing to hectares displays L/ha', API.displayRate(), 20 / 0.404685642, 1e-8);
+check('L/ha entry converts to per-acre calculation rate', API.rateFromDisplay(20 / 0.404685642), 20, 1e-8);
+check('unit switch preserves total spray volume', compute().total, beforeUnitChange.total, 1e-4);
+API.setAreaUnit('ac');
+check('switching back restores entered acres', Number(API.getS().area), 5, 1e-8);
+S2({ area: '' }); API.setAreaUnit('ha');
+check('blank area stays blank when units change', API.getS().area, '');
 
 group('7. Solids');
 S2({ products: [{ name: "WP", basis: "area", unit: "g", dose: "300", labelTank: 16, ratio: "" }] });

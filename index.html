@@ -309,12 +309,11 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
 
       <div class="field critical-field">
         <label class="lab" for="rate"><span data-t="labRate">大疆喷洒量</span><span class="key-badge" data-t="keyInput">最重要</span></label>
-        <div class="chips grow" id="rateUnitChips"></div>
-        <div class="row joined" style="margin-top:6px">
+        <div class="row joined">
           <input class="grow" type="number" id="rate" inputmode="decimal" min="0" step="0.5">
           <div class="suffix" id="rateSuffix">L / 英亩</div>
         </div>
-        <p class="hint" data-t="hintRate">从大疆遥控器的「任务设置 → 喷洒量」抄录。建议用清水试飞核对。</p>
+        <p class="hint" data-t="hintRate">从大疆遥控器的「任务设置 → 喷洒量」抄录，并确认单位与上方一致。建议用清水试飞核对。</p>
       </div>
 
       <div class="field">
@@ -468,7 +467,7 @@ zh:{
   labArea:"大疆测绘喷洒面积", unAcre:"英亩",
   labRate:"大疆喷洒量",
   keyInput:"最重要",
-  hintRate:"从大疆遥控器的「任务设置 → 喷洒量」抄录。建议用清水试飞核对。",
+  hintRate:"从大疆遥控器的「任务设置 → 喷洒量」抄录，并确认单位与上方一致。建议用清水试飞核对。",
   labConv:"地面喷雾量",
   hintConv:"用实际常规喷雾量，把标签每桶用量换算成每英亩药量。",
   hintConvRatio:"与地面稀释比例一起使用，算出每英亩实际药量。",
@@ -537,7 +536,7 @@ en:{
   labArea:"DJI mapped spray area", unAcre:"acre",
   labRate:"DJI application rate",
   keyInput:"Most important",
-  hintRate:"Copy this from Task Settings → Application Rate on the DJI controller. Verify it with a water-only flight.",
+  hintRate:"Copy this from Task Settings → Application Rate on the DJI controller. Check the unit matches the area unit above, then verify with a water-only flight.",
   labConv:"Ground sprayer output",
   hintConv:"Uses your actual conventional spray volume to convert a label-per-tank dose into product per acre.",
   hintConvRatio:"Used with the ground dilution to calculate the actual product dose per acre.",
@@ -606,7 +605,7 @@ ms:{
   labArea:"Keluasan semburan dipetakan DJI", unAcre:"ekar",
   labRate:"Kadar aplikasi DJI",
   keyInput:"Paling penting",
-  hintRate:"Salin daripada Tetapan Tugas → Kadar Aplikasi pada alat kawalan DJI. Sahkan dengan penerbangan air bersih.",
+  hintRate:"Salin daripada Tetapan Tugas → Kadar Aplikasi pada alat kawalan DJI. Pastikan unitnya sama dengan unit keluasan di atas, kemudian sahkan dengan penerbangan air bersih.",
   labConv:"Keluaran penyembur darat",
   hintConv:"Menggunakan isipadu semburan biasa sebenar untuk menukar dos label setangki kepada racun se-ekar.",
   hintConvRatio:"Digunakan bersama pencairan darat untuk mengira dos racun sebenar se-ekar.",
@@ -676,7 +675,7 @@ var DEFAULT={
   lang:null, size:0,
   model:"T50", tank:40,
   areaUnit:"ac", area:"",
-  rate:"", rateUnit:"ac", calUnit:"ac", conv:"", split:"even", recipeName:"",
+  rate:"", calUnit:"ac", conv:"", split:"even", recipeName:"",
   profile:{name:"",droplet:"",speed:"",height:"",spacing:""},
   products:[{name:"",basis:"area",unit:"ml",dose:"",doseAreaUnit:"ac",labelTank:"",ratio:""}]
 };
@@ -735,9 +734,17 @@ function amount(base,liquid){
 var TO_BASE={ml:1,l:1000,g:1,kg:1000};
 var HA_PER_ACRE=0.404685642;
 function isLiquidUnit(u){ return u==="ml"||u==="l"; }
-function displayRate(){ return S.rateUnit==="ha"?num(S.rate)/HA_PER_ACRE:num(S.rate); }
+function setAreaUnit(unit){
+  if(unit===S.areaUnit) return;
+  if(S.area!=="" && num(S.area)>0){
+    var converted=unit==="ha"?num(S.area)*HA_PER_ACRE:num(S.area)/HA_PER_ACRE;
+    S.area=String(Number(converted.toPrecision(12)));
+  }
+  S.areaUnit=unit;
+}
+function displayRate(){ return S.areaUnit==="ha"?num(S.rate)/HA_PER_ACRE:num(S.rate); }
 function displayRateText(){ return num(S.rate)>0?fmt(displayRate()):""; }
-function rateFromDisplay(v){ return S.rateUnit==="ha"?num(v)*HA_PER_ACRE:num(v); }
+function rateFromDisplay(v){ return S.areaUnit==="ha"?num(v)*HA_PER_ACRE:num(v); }
 
 /* ===================== core calculation ===================== */
 function compute(){
@@ -908,12 +915,7 @@ function refreshChips(){
 }
 
 function renderRateUnits(){
-  chipRow($("rateUnitChips"),[
-    {label:"L / "+t("unAcre"),value:"ac"},{label:"L / "+t("uHa"),value:"ha"}
-  ],S.rateUnit||"ac",function(v){
-    S.rateUnit=v; save(); renderInputs(); renderResult();
-  });
-  $("rateSuffix").textContent="L / "+(S.rateUnit==="ha"?t("uHa"):t("unAcre"));
+  $("rateSuffix").textContent="L / "+(S.areaUnit==="ha"?t("uHa"):t("unAcre"));
   setVal("rate",displayRateText());
 }
 
@@ -967,7 +969,7 @@ function renderInputs(){
 
   chipRow($("areaUnitChips"),[
     {label:t("uAc"),value:"ac"},{label:t("uHa"),value:"ha"}
-  ],S.areaUnit,function(v){ S.areaUnit=v; save(); renderChrome(); renderInputs(); renderResult(); });
+  ],S.areaUnit,function(v){ setAreaUnit(v); save(); renderChrome(); renderInputs(); renderResult(); calUpdate(); });
 
   renderRateUnits();
   renderCalUnits();
@@ -1110,7 +1112,7 @@ function productComplete(p){
 }
 function recipeData(){
   return {
-    model:S.model,tank:S.tank,rate:S.rate,rateUnit:S.rateUnit,conv:S.conv,split:S.split,
+    model:S.model,tank:S.tank,rate:S.rate,conv:S.conv,split:S.split,
     profile:clone(S.profile||DEFAULT.profile),products:clone(S.products)
   };
 }
@@ -1138,7 +1140,7 @@ function loadRecipe(r){
   var keepArea=S.area, keepAreaUnit=S.areaUnit;
   S.model=r.data.model||DEFAULT.model;
   S.tank=r.data.tank!==undefined?r.data.tank:modelTank(S.model);
-  S.rate=r.data.rate||""; S.rateUnit=r.data.rateUnit||"ac"; S.conv=r.data.conv||""; S.split=r.data.split||"even";
+  S.rate=r.data.rate||""; S.conv=r.data.conv||""; S.split=r.data.split||"even";
   S.profile=clone(r.data.profile||DEFAULT.profile);
   S.products=clone(Array.isArray(r.data.products)&&r.data.products.length?r.data.products:DEFAULT.products);
   S.products.forEach(function(p){ if(p.doseAreaUnit!=="ha") p.doseAreaUnit="ac"; });
@@ -1366,8 +1368,8 @@ function calUpdate(){
   if(L>0 && a>0){
     var acres=S.calUnit==="ha"?a*2.471054:a;
     var rateAc=L/acres;
-    var shown=S.rateUnit==="ha"?rateAc/HA_PER_ACRE:rateAc;
-    var unit="L / "+(S.rateUnit==="ha"?t("uHa"):t("unAcre"));
+    var shown=S.areaUnit==="ha"?rateAc/HA_PER_ACRE:rateAc;
+    var unit="L / "+(S.areaUnit==="ha"?t("uHa"):t("unAcre"));
     out.innerHTML='<div class="note green">'+esc(fill(t("calResult"),{v:fmt(shown)+" "+unit}))+'</div>';
     out.dataset.v=rateAc;
   }else{ out.innerHTML=""; out.dataset.v=""; }
