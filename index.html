@@ -66,6 +66,16 @@ header{
   cursor:pointer;
 }
 .hbtn:active{background:#20394B}
+.update-toast{
+  position:fixed;z-index:90;left:14px;right:14px;
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  max-width:532px;margin:0 auto;padding:14px;
+  background:var(--ink);color:#fff;border:2px solid #6E8AA0;
+  border-radius:var(--radius);box-shadow:0 6px 24px #0E223355;
+  display:flex;align-items:center;gap:12px;
+}
+.update-toast span{flex:1;font-weight:700}
+.update-toast button{min-height:44px;padding:8px 12px;font-family:inherit;font-size:.9em;font-weight:700;background:#fff;color:var(--ink);border:0;border-radius:var(--radius);cursor:pointer}
 
 /* ---------- blocks ---------- */
 section{
@@ -274,6 +284,9 @@ td.num,th.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums
   <button class="hbtn" id="langBtn" aria-label="language">中文</button>
   <button class="hbtn" id="sizeBtn" aria-label="text size">Aa</button>
 </header>
+<div class="update-toast hidden" id="updateToast" role="status" aria-live="polite">
+  <span id="updateMessage"></span><button id="updateAction" type="button"></button>
+</div>
 
 <div class="wrap">
 
@@ -467,6 +480,7 @@ var MODELS = [
 var I18N = {
 zh:{
   code:"中文", title:"无人机配药", sub:"以大疆机型为基准",
+  updateReady:"新版本已下载。重新载入以更新软件。", updateReload:"重新载入", updateDone:"软件已更新。", updateDismiss:"知道了",
   secInputs:"喷药设定", secInputsNote:"计算所需的全部输入都在这里",
   labDrone:"无人机机型与药桶容量", custom:"自定",
   labCustomTank:"自定药桶容量",
@@ -536,6 +550,7 @@ zh:{
 },
 en:{
   code:"EN", title:"DroneDose", sub:"DJI models as the baseline",
+  updateReady:"A new version is ready. Reload to update the app.", updateReload:"Reload", updateDone:"App updated.", updateDismiss:"OK",
   secInputs:"Spray setup", secInputsNote:"Every input the calculation needs sits here",
   labDrone:"Drone model and tank capacity", custom:"Custom",
   labCustomTank:"Custom tank capacity",
@@ -605,6 +620,7 @@ en:{
 },
 ms:{
   code:"BM", title:"DroneDose", sub:"Berasaskan model DJI",
+  updateReady:"Versi baharu sudah tersedia. Muat semula untuk mengemas kini aplikasi.", updateReload:"Muat semula", updateDone:"Aplikasi telah dikemas kini.", updateDismiss:"OK",
   secInputs:"Tetapan semburan", secInputsNote:"Semua maklumat yang diperlukan ada di sini",
   labDrone:"Model dron dan isipadu tangki", custom:"Sendiri",
   labCustomTank:"Isipadu tangki sendiri",
@@ -858,6 +874,7 @@ function renderChrome(){
   $("appSub").textContent=t("sub");
   $("langBtn").textContent=t("code");
   document.title=(S.lang==="zh"?"无人机配药 · DroneDose":"DroneDose");
+  renderUpdateToast();
   var nodes=document.querySelectorAll("[data-t]"), i, k;
   for(i=0;i<nodes.length;i++){
     k=nodes[i].getAttribute("data-t");
@@ -1422,9 +1439,48 @@ if(S.lang){
   gate.classList.remove("hidden");
 }
 
+/* Notify installed users without discarding their current inputs. */
+var APP_VERSION="v28", VERSION_KEY="dronedose.version", updateToastMode="";
+function renderUpdateToast(){
+  if(!updateToastMode) return;
+  $("updateMessage").textContent=t(updateToastMode==="ready"?"updateReady":"updateDone");
+  $("updateAction").textContent=t(updateToastMode==="ready"?"updateReload":"updateDismiss");
+}
+function showUpdateToast(mode){
+  updateToastMode=mode;
+  renderUpdateToast();
+  $("updateToast").classList.remove("hidden");
+}
+$("updateAction").addEventListener("click",function(){
+  if(updateToastMode==="ready") window.location.reload();
+  else { updateToastMode=""; $("updateToast").classList.add("hidden"); }
+});
+try{
+  var previousVersion=localStorage.getItem(VERSION_KEY);
+  localStorage.setItem(VERSION_KEY,APP_VERSION);
+  if(previousVersion && previousVersion!==APP_VERSION) showUpdateToast("done");
+}catch(e){}
+
 if("serviceWorker" in navigator){
+  var hadController=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange",function(){
+    if(hadController) showUpdateToast("ready");
+    hadController=true;
+  });
   window.addEventListener("load",function(){
-    navigator.serviceWorker.register("sw.js").catch(function(){});
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      function watch(worker){
+        if(!worker) return;
+        worker.addEventListener("statechange",function(){
+          if(worker.state==="installed" && navigator.serviceWorker.controller) showUpdateToast("ready");
+        });
+      }
+      if(reg.waiting && navigator.serviceWorker.controller) showUpdateToast("ready");
+      reg.addEventListener("updatefound",function(){ watch(reg.installing); });
+      function checkForUpdate(){ reg.update().catch(function(){}); }
+      document.addEventListener("visibilitychange",function(){ if(!document.hidden) checkForUpdate(); });
+      window.addEventListener("online",checkForUpdate);
+    }).catch(function(){});
   });
 }
 </script>
