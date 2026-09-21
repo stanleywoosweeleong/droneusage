@@ -1,6 +1,6 @@
 {
-  "name": "无人机配药 · DroneDose",
-  "short_name": "配药",
+  "name": "DroneDose 无人机剂量计算机",
+  "short_name": "DroneDose",
   "description": "农用无人机药量计算 · Agricultural drone spray dosage calculator",
   "start_url": "./index.html",
   "scope": "./",
