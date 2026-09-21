@@ -28,7 +28,7 @@ const core = src.slice(src.indexOf(START), src.indexOf(END));
 const prelude = `
 var S = null;
 function t(k){ return {errArea:"ERR_AREA",errRate:"ERR_RATE",errTank:"ERR_TANK",
-  errConv:"ERR_CONV",errDose:"ERR_DOSE {name}",errTankOverflow:"ERR_TANK_OVERFLOW",prodName:"Product",unnamed:"Product",
+  errConv:"ERR_CONV",errDose:"ERR_DOSE {name}",errLabelTank:"ERR_LABEL_TANK {name}",errRatio:"ERR_RATIO {name}",errTankOverflow:"ERR_TANK_OVERFLOW",prodName:"Product",unnamed:"Product",
   warnHighConc:"HIGH_CONC",warnRatioConversion:"RATIO_CONVERSION",warnVolume:"VOL {p}",warnPartial:"PARTIAL {v}"}[k] || k; }
 function fill(s,o){ var k; for(k in o){ s=s.split("{"+k+"}").join(o[k]); } return s; }
 `;
@@ -131,12 +131,31 @@ S2({ tank: 0 });  check('zero tank blocks output', compute().ok, false);
 S2({ conv: 0, products: [{ name: "L", basis: "tank", unit: "ml", dose: "20", labelTank: 16, ratio: "" }] });
 check('label basis without conventional volume is flagged',
   compute().errors.includes("ERR_CONV"), true);
-S2({ products: [{ name: "", basis: "area", unit: "ml", dose: "", labelTank: 16, ratio: "" }] });
+S2({ products: [{ name: "", basis: "area", unit: "ml", dose: "", labelTank: "", ratio: "" }] });
 check('untouched product raises no noise', compute().errors.length, 0);
 S2({ rate: 1, products: [{ name: "Impossible", basis: "area", unit: "ml", dose: "1000", doseAreaUnit: "ac", labelTank: 16, ratio: "" }] });
 r = compute();
 check('liquid product equal to spray volume is blocked', r.ok, false);
 check('impossible mixture has a stated error', r.errors.includes('ERR_TANK_OVERFLOW'), true);
+S2({ products: [
+  { name: "A", basis: "area", unit: "ml", dose: "500", doseAreaUnit: "ac", labelTank: "", ratio: "" },
+  { name: "B", basis: "tank", unit: "ml", dose: "20", doseAreaUnit: "ac", labelTank: "", ratio: "" }
+] });
+r = compute();
+check('incomplete second product blocks the mixing sheet', r.ok, false);
+check('missing label water volume is explained', r.errors.includes('ERR_LABEL_TANK B'), true);
+S2({ products: [
+  { name: "A", basis: "area", unit: "ml", dose: "500", doseAreaUnit: "ac", labelTank: "", ratio: "" },
+  { name: "", basis: "area", unit: "ml", dose: "", doseAreaUnit: "ac", labelTank: "", ratio: "" }
+] });
+check('an added but blank product blocks until cleared', compute().ok, false);
+S2({ products: [{ name: "A", basis: "area", unit: "ml", dose: "500", doseAreaUnit: "ac", labelTank: "", ratio: "" }] });
+check('removing the incomplete entry restores a valid sheet', compute().ok, true);
+S2({ products: [
+  { name: "A", basis: "area", unit: "ml", dose: "500", doseAreaUnit: "ac", labelTank: "", ratio: "" },
+  { name: "B", basis: "ratio", unit: "ml", dose: "", doseAreaUnit: "ac", labelTank: "", ratio: "" }
+] });
+check('missing dilution ratio is explained', compute().errors.includes('ERR_RATIO B'), true);
 
 group('9. Safety warnings');
 S2({ rate: 6, products: [{ name: "Strong", basis: "area", unit: "ml", dose: "5000", labelTank: 16, ratio: "" }] });

@@ -160,6 +160,7 @@ html[lang="zh"] .basis-chips .chip{white-space:nowrap}
 }
 .prod-top{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .prod-top .grow{flex:1}
+.clear-prod{width:100%;min-height:44px;margin-top:8px;padding:8px 12px;font:inherit;font-weight:700;color:var(--red);background:var(--control);border:2px solid var(--line-strong);border-radius:var(--radius);cursor:pointer}
 .recipe-row{border:1px solid var(--line);border-radius:var(--radius);padding:10px;margin-top:8px;background:var(--card)}
 .recipe-name{font-weight:800}
 .recipe-meta{font-size:.86em;color:var(--ink-soft);margin:3px 0 8px}
@@ -497,7 +498,7 @@ zh:{
   convertedDose:"地面等效药量：{v}／英亩", partsSpray:"份喷液",
   labSplit:"药桶怎样分装", hintSplit:"选择平均分装，或先装满药桶、最后一桶装余量。", splitEven:"平均分装", splitFull:"先装满桶",
   secProducts:"药剂", secProductsNote:"本软件一次最多计算 4 种药剂；这不是混配建议。混配前请确认每种药剂获准使用且相互兼容。",
-  prodName:"药剂名称", unnamed:"药剂",
+  prodName:"药剂名称", unnamed:"药剂", clearEntry:"清除此药剂",
   basisArea:"按面积", basisTank:"标签每桶", basisRatio:"地面稀释",
   basisHelpArea:"直接填写标签规定的每英亩或每公顷用量。",
   basisHelpTank:"标签例子：每 16 L 水加 20 mL。本软件会先换算成每英亩用量。",
@@ -511,7 +512,7 @@ zh:{
   emptyMsg:"填入面积、喷液量和至少一种药剂，配药单就会出现在这里。",
   errArea:"请填写喷药面积。", errRate:"请填写每英亩喷液量。", errTank:"请填写药桶容量。",
   errConv:"有药剂按「标签每桶」或「稀释比例」输入，请先填写常规喷雾用水量。",
-  errDose:"请填写「{name}」的用量。",
+  errDose:"请填写「{name}」的用量。", errLabelTank:"请填写「{name}」标签所用的水量（L）。", errRatio:"请填写「{name}」的稀释比例。",
   errTankOverflow:"液体药剂体积已达到或超过总喷液量，无法加入清水。请核对药量、面积单位和大疆喷洒量。",
   concTitle:"药液浓度",
   concLine:"{name}：每 L 药液 {perL}（{pct}%）",
@@ -567,7 +568,7 @@ en:{
   convertedDose:"Ground-equivalent product dose: {v}/acre", partsSpray:"parts spray",
   labSplit:"How to fill the tanks", hintSplit:"Choose balanced loads, or fill tanks first and put the remainder in the last load.", splitEven:"Balance evenly", splitFull:"Fill tanks first",
   secProducts:"Products", secProductsNote:"This calculator supports up to 4 products per mixture. This is not a mixing recommendation. Confirm every product is permitted and compatible before mixing.",
-  prodName:"Product name", unnamed:"Product",
+  prodName:"Product name", unnamed:"Product", clearEntry:"Clear this product",
   basisArea:"Rate by area", basisTank:"Label per tank", basisRatio:"Ground dilution",
   basisHelpArea:"Enter the label rate per acre or per hectare directly.",
   basisHelpTank:"Label example: 20 mL per 16 L water. The app first converts this to a per-acre rate.",
@@ -581,7 +582,7 @@ en:{
   emptyMsg:"Enter an area, a spray volume and at least one product, and the mixing sheet appears here.",
   errArea:"Enter the area to spray.", errRate:"Enter the spray volume per acre.", errTank:"Enter the tank volume.",
   errConv:"A product is entered per label tank or as a ratio — fill in the conventional spray water volume first.",
-  errDose:"Enter a dose for \u201c{name}\u201d.",
+  errDose:"Enter a dose for \u201c{name}\u201d.", errLabelTank:"Enter the label water volume (L) for \u201c{name}\u201d.", errRatio:"Enter the dilution ratio for \u201c{name}\u201d.",
   errTankOverflow:"Liquid products equal or exceed the total spray volume, leaving no room for water. Check the dose, area unit and DJI application rate.",
   concTitle:"Tank concentration",
   concLine:"{name}: {perL} per L of mix ({pct}%)",
@@ -637,7 +638,7 @@ ms:{
   convertedDose:"Dos racun setara darat: {v}/ekar", partsSpray:"bahagian semburan",
   labSplit:"Cara mengisi tangki", hintSplit:"Pilih muatan seimbang, atau isi tangki penuh dahulu dan letakkan baki dalam muatan terakhir.", splitEven:"Bahagi sama rata", splitFull:"Isi penuh dahulu",
   secProducts:"Racun", secProductsNote:"Perisian ini boleh mengira sehingga 4 racun dalam satu campuran. Ini bukan cadangan campuran. Sebelum mencampur, pastikan setiap racun dibenarkan dan serasi.",
-  prodName:"Nama racun", unnamed:"Racun",
+  prodName:"Nama racun", unnamed:"Racun", clearEntry:"Kosongkan racun ini",
   basisArea:"Kadar ikut luas", basisTank:"Label setangki", basisRatio:"Pencairan darat",
   basisHelpArea:"Masukkan kadar label se-ekar atau sehektar secara terus.",
   basisHelpTank:"Contoh label: 20 mL bagi 16 L air. Perisian menukarnya dahulu kepada kadar se-ekar.",
@@ -651,7 +652,7 @@ ms:{
   emptyMsg:"Masukkan luas kawasan, isipadu semburan dan sekurang-kurangnya satu racun — senarai campuran akan muncul di sini.",
   errArea:"Masukkan luas kawasan.", errRate:"Masukkan isipadu semburan se-ekar.", errTank:"Masukkan isipadu tangki.",
   errConv:"Ada racun yang dimasukkan ikut label setangki atau nisbah — isi dahulu isipadu air semburan biasa.",
-  errDose:"Masukkan dos untuk \u201c{name}\u201d.",
+  errDose:"Masukkan dos untuk \u201c{name}\u201d.", errLabelTank:"Masukkan isipadu air pada label (L) untuk \u201c{name}\u201d.", errRatio:"Masukkan nisbah pencairan untuk \u201c{name}\u201d.",
   errTankOverflow:"Isipadu racun cecair menyamai atau melebihi jumlah semburan, jadi tiada ruang untuk air. Semak dos, unit luas dan kadar aplikasi DJI.",
   concTitle:"Kepekatan dalam tangki",
   concLine:"{name}: {perL} setiap L campuran ({pct}%)",
@@ -770,6 +771,10 @@ function setAreaUnit(unit){
 function displayRate(){ return S.areaUnit==="ha"?num(S.rate)/HA_PER_ACRE:num(S.rate); }
 function displayRateText(){ return num(S.rate)>0?fmt(displayRate()):""; }
 function rateFromDisplay(v){ return S.areaUnit==="ha"?num(v)*HA_PER_ACRE:num(v); }
+function entered(v){ return v!==undefined && v!==null && String(v).trim()!==""; }
+function productStarted(p){
+  return !!String(p.name||"").trim() || entered(p.dose) || entered(p.ratio) || entered(p.labelTank) || p.basis!=="area";
+}
 
 /* ===================== core calculation ===================== */
 function compute(){
@@ -801,9 +806,14 @@ function compute(){
       if(num(p.ratio)>0){ hasRatio=true; perAcre=(1000/num(p.ratio))*conv; }
     }
     var named = (p.name||"").trim();
-    var hasInput = p.basis==="ratio" ? num(p.ratio)>0 : num(p.dose)>0;
-    if(!hasInput && (named||S.products.length>1||i===0)){
-      if(named) r.errors.push(fill(t("errDose"),{name:named}));
+    var labelName=named || (t("unnamed")+" "+(i+1));
+    if(i>0 || productStarted(p)){
+      if(p.basis==="ratio"){
+        if(num(p.ratio)<=0) r.errors.push(fill(t("errRatio"),{name:labelName}));
+      }else{
+        if(num(p.dose)<=0) r.errors.push(fill(t("errDose"),{name:labelName}));
+        if(p.basis==="tank" && num(p.labelTank)<=0) r.errors.push(fill(t("errLabelTank"),{name:labelName}));
+      }
     }
     if(perAcre>0){
       items.push({
@@ -1031,15 +1041,6 @@ function renderProducts(){
     nm.setAttribute("aria-label",t("prodName"));
     nm.addEventListener("input",function(){ p.name=nm.value; save(); renderResult(); });
     top.appendChild(nm);
-    if(S.products.length>1){
-      var rm=document.createElement("button");
-      rm.type="button"; rm.className="icon-btn"; rm.textContent="×";
-      rm.setAttribute("aria-label","remove");
-      rm.addEventListener("click",function(){
-        S.products.splice(idx,1); save(); renderProducts(); renderResult();
-      });
-      top.appendChild(rm);
-    }
     d.appendChild(top);
 
     var bWrap=document.createElement("div"); bWrap.className="field";
@@ -1097,6 +1098,16 @@ function renderProducts(){
       if(p.basis==="tank"){
         d.appendChild(numField("product-label-tank-"+idx,t("perTank"),p.labelTank,t("water"),function(v){ p.labelTank=v; save(); renderResult(); }));
       }
+    }
+    if(S.products.length>1 || productStarted(p)){
+      var clear=document.createElement("button");
+      clear.type="button"; clear.className="clear-prod"; clear.textContent=t("clearEntry");
+      clear.addEventListener("click",function(){
+        if(S.products.length>1) S.products.splice(idx,1);
+        else S.products[0]=clone(DEFAULT.products[0]);
+        save(); renderProducts(); renderResult();
+      });
+      d.appendChild(clear);
     }
     list.appendChild(d);
   });
@@ -1344,8 +1355,8 @@ $("saveRecipe").addEventListener("click",function(){
   var name=(S.recipeName||"").trim(), msg=$("recipeMsg");
   if(!name){ msg.innerHTML='<div class="note red">'+esc(t("recipeNeedName"))+'</div>'; return; }
   var complete=S.products.filter(productComplete);
-  var incompleteNamed=S.products.some(function(p){ return (p.name||"").trim()&&!productComplete(p); });
-  if(num(S.rate)<=0||num(S.tank)<=0||!complete.length||incompleteNamed){
+  var incomplete=S.products.some(function(p,i){ return (i>0||productStarted(p))&&!productComplete(p); });
+  if(num(S.rate)<=0||num(S.tank)<=0||!complete.length||incomplete){
     msg.innerHTML='<div class="note red">'+esc(t("recipeIncomplete"))+'</div>'; return;
   }
   var recipes=getRecipes(), match=null;
@@ -1441,7 +1452,7 @@ if(S.lang){
 }
 
 /* Notify installed users without discarding their current inputs. */
-var APP_VERSION="v29", VERSION_KEY="dronedose.version", updateToastMode="";
+var APP_VERSION="v30", VERSION_KEY="dronedose.version", updateToastMode="";
 function renderUpdateToast(){
   if(!updateToastMode) return;
   $("updateMessage").textContent=t(updateToastMode==="ready"?"updateReady":"updateDone");
