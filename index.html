@@ -30,8 +30,6 @@
   --base:17px;
   --radius:4px;
   box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
 }
 *,*::before,*::after{box-sizing:inherit}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -47,7 +45,7 @@ body{
   font-variant-numeric:tabular-nums;
   -webkit-tap-highlight-color:transparent;
 }
-.wrap{max-width:560px;margin:0 auto;padding:0 14px 80px}
+.wrap{max-width:560px;margin:0 auto;padding:0 14px calc(80px + env(safe-area-inset-bottom,0px))}
 
 /* ---------- header ---------- */
 header{
