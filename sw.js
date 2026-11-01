@@ -1,7 +1,7 @@
 /* 无人机药量计算 · DroneDose — service worker
    Network-first with a timeout. Bump CACHE here AND APP_VERSION in
    index.html on every deploy. */
-const CACHE = "dronedose-v33";
+const CACHE = "dronedose-v34";
 const NETWORK_TIMEOUT_MS = 3000; /* weak orchard signal: fall back to cache instead of hanging */
 const ASSETS = [
   "./",
@@ -22,9 +22,11 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
+  /* Only remove this app's old builds: other GitHub Pages projects on the
+     same hostname share Cache Storage. */
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.indexOf("dronedose-") === 0 && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

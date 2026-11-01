@@ -34,7 +34,7 @@ function fill(s,o){ var k; for(k in o){ s=s.split("{"+k+"}").join(o[k]); } retur
 `;
 
 const API = new Function(prelude + core +
-  '\nreturn {compute:compute, fmt:fmt, amount:amount, num:num, setAreaUnit:setAreaUnit, displayRate:displayRate, rateFromDisplay:rateFromDisplay, displayConv:displayConv, getS:function(){return S;}, setS:function(x){S=x;}};')();
+  '\nreturn {compute:compute, fmt:fmt, amount:amount, num:num, setAreaUnit:setAreaUnit, displayRate:displayRate, rateFromDisplay:rateFromDisplay, displayConv:displayConv, unitForForm:unitForForm, getS:function(){return S;}, setS:function(x){S=x;}};')();
 const compute = API.compute, amount = API.amount, setS = API.setS;
 
 let pass = 0, fail = 0;
@@ -236,6 +236,19 @@ check('999.4 mL stays millilitres', amount(999.4, true), '999 mL');
 check('a tiny dose is not printed as 0', API.fmt(0.0004), '0.0004');
 check('three significant figures below 0.1', API.fmt(0.012345), '0.0123');
 check('zero is still 0', API.fmt(0), '0');
+
+group('17. Ratio Liquid/Solid choice never rescales a kept dose');
+/* 1 L/acre -> ratio mode -> tap Liquid -> back to per-acre must stay 1 L/acre,
+   not become 1 mL/acre (a 1000x under-dose). */
+check('Liquid keeps L', API.unitForForm('l', true), 'l');
+check('Liquid keeps mL', API.unitForForm('ml', true), 'ml');
+check('Liquid from kg is L', API.unitForForm('kg', true), 'l');
+check('Liquid from g is mL', API.unitForForm('g', true), 'ml');
+check('Solid keeps kg', API.unitForForm('kg', false), 'kg');
+check('Solid from L is kg', API.unitForForm('l', false), 'kg');
+check('Solid from mL is g', API.unitForForm('ml', false), 'g');
+S2({ products: [{ name: 'A', basis: 'area', unit: API.unitForForm('l', true), dose: '1', doseAreaUnit: 'ac' }] }); r = compute();
+check('1 L/acre survives a ratio-mode Liquid tap', r.totals[0].base, 1000 * 5, 1e-9);
 
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);

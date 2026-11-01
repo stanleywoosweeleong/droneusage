@@ -801,6 +801,13 @@ function amount(base,liquid){
 var TO_BASE={ml:1,l:1000,g:1,kg:1000};
 var HA_PER_ACRE=0.404685642;
 function isLiquidUnit(u){ return u==="ml"||u==="l"; }
+/* Ratio mode's Liquid/Solid choice keeps the unit's scale (L<->kg, mL<->g).
+   Mapping to a fixed mL/g would silently turn a kept 1 L dose into 1 mL
+   when the user switches back to a per-acre or per-tank mode. */
+function unitForForm(u,liquid){
+  if(liquid) return u==="kg"?"l":(u==="g"?"ml":u);
+  return u==="l"?"kg":(u==="ml"?"g":u);
+}
 var areaConversion=null; /* last unit conversion, shown until the area is retyped */
 function setAreaUnit(unit){
   if(unit===S.areaUnit) return;
@@ -1123,7 +1130,7 @@ function renderProducts(){
       formChips.style.marginBottom="10px";
       chipRow(formChips,[
         {label:t("ratioLiquid"),value:"ml"},{label:t("ratioSolid"),value:"g"}
-      ],isLiquidUnit(p.unit)?"ml":"g",function(v){ p.unit=v; save(); renderProducts(); renderResult(); });
+      ],isLiquidUnit(p.unit)?"ml":"g",function(v){ p.unit=unitForForm(p.unit,v==="ml"); save(); renderProducts(); renderResult(); });
       d.appendChild(formChips);
       var preview=document.createElement("div");
       preview.className="note green conversion-preview hidden";
@@ -1518,6 +1525,9 @@ $("resetBtn").addEventListener("click",function(){
   if(!window.confirm(t("confirmReset"))) return;
   var lang=S.lang, size=S.size, model=S.model;
   S=clone(DEFAULT); S.lang=lang; S.size=size; S.model=model; S.tank=modelTank(model);
+  /* calibration inputs live only in the DOM: clear them with the rest, or a
+     cached result computed in the old area unit could still be applied */
+  $("calL").value=""; $("calA").value=""; calUpdate();
   save(); renderChrome(); renderInputs(); renderResult();
 });
 
@@ -1544,7 +1554,7 @@ if(S.lang){
 }
 
 /* Notify installed users without discarding their current inputs. */
-var APP_VERSION="v33", VERSION_KEY="dronedose.version", updateToastMode="";
+var APP_VERSION="v34", VERSION_KEY="dronedose.version", updateToastMode="";
 function renderUpdateToast(){
   if(!updateToastMode) return;
   $("updateMessage").textContent=t(updateToastMode==="ready"?"updateReady":(updateToastMode==="offline"?"offlineFail":"updateDone"));
