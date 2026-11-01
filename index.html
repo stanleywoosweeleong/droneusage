@@ -1554,7 +1554,21 @@ if(S.lang){
 }
 
 /* Notify installed users without discarding their current inputs. */
-var APP_VERSION="v34", VERSION_KEY="dronedose.version", updateToastMode="";
+/* "App updated" detection with nothing to bump by hand: fingerprint this
+   script and the page's CSS (all logic, strings and styling live there).
+   When the fingerprint differs from the one this device last ran, the code
+   changed. Must run at top level so document.currentScript is set. */
+function fingerprint(str){
+  var h=0x811c9dc5, i;
+  for(i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,0x01000193); }
+  return (h>>>0).toString(36);
+}
+var APP_FINGERPRINT=(function(){
+  var src=document.currentScript?document.currentScript.textContent:"", styles=document.querySelectorAll("style"), i;
+  for(i=0;i<styles.length;i++) src+=styles[i].textContent;
+  return fingerprint(src);
+})();
+var VERSION_KEY="dronedose.version", updateToastMode="";
 function renderUpdateToast(){
   if(!updateToastMode) return;
   $("updateMessage").textContent=t(updateToastMode==="ready"?"updateReady":(updateToastMode==="offline"?"offlineFail":"updateDone"));
@@ -1571,8 +1585,8 @@ $("updateAction").addEventListener("click",function(){
 });
 try{
   var previousVersion=localStorage.getItem(VERSION_KEY);
-  localStorage.setItem(VERSION_KEY,APP_VERSION);
-  if(previousVersion && previousVersion!==APP_VERSION) showUpdateToast("done");
+  localStorage.setItem(VERSION_KEY,APP_FINGERPRINT);
+  if(previousVersion && previousVersion!==APP_FINGERPRINT) showUpdateToast("done");
 }catch(e){}
 
 if("serviceWorker" in navigator){
@@ -1580,6 +1594,11 @@ if("serviceWorker" in navigator){
   navigator.serviceWorker.addEventListener("controllerchange",function(){
     if(hadController) showUpdateToast("ready");
     hadController=true;
+  });
+  /* the page was answered from the cache and the worker has since stored a
+     newer build: offer a reload */
+  navigator.serviceWorker.addEventListener("message",function(e){
+    if(e.data && e.data.type==="dronedose-update-ready") showUpdateToast("ready");
   });
   window.addEventListener("load",function(){
     navigator.serviceWorker.register("sw.js").then(function(reg){

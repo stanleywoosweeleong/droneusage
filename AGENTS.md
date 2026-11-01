@@ -19,7 +19,7 @@ breaks the deployment workflow it was designed around.
 | File | Role |
 |---|---|
 | `index.html` | The entire app — markup, CSS, i18n strings, logic |
-| `sw.js` | Service worker, network-first with 3 s timeout; only caches good same-origin responses; install fails loudly |
+| `sw.js` | Service worker, network-first with 3 s timeout and HTTP revalidation; only caches good same-origin responses; install fails loudly; no version to bump |
 | `manifest.webmanifest` | PWA manifest |
 | `icon-*.png` | App icons |
 | `make_icons.py` | Regenerates the icons (Pillow) |
@@ -39,9 +39,16 @@ update the markers at the top of the test.
 If you change dosing behaviour deliberately, change the test in the same
 commit and say why. Do not delete a failing check to make the suite green.
 
-**Bump `CACHE` in `sw.js` AND `APP_VERSION` in `index.html` on every deploy**
-(same number). `CACHE` replaces the old cached build; `APP_VERSION` drives the
-"updated" notice.
+**There is no version number to bump on deploy.** The service worker uses
+one permanent cache (`dronedose-app`) and refreshes it from the network on
+every online load, revalidating past GitHub Pages' HTTP cache. A page served
+from cache (offline / slow signal) is told by the worker when a newer
+`index.html` has arrived, and offers a reload. The "App updated" notice
+comes from `APP_FINGERPRINT`, a hash of the inline script and CSS computed
+at runtime. Edit `sw.js` only to change the worker's behaviour; if you add
+a file the app needs offline, add it to `ASSETS` there. Do not reintroduce
+a hand-bumped version, and do not rename the cache: activation deletes every
+other `dronedose-` cache.
 
 ## Correctness rules — these are the point of the app
 
