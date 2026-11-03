@@ -17,9 +17,13 @@
 const CACHE = "dronedose-app";
 const CACHE_PREFIX = "dronedose-";
 const NETWORK_TIMEOUT_MS = 3000; /* weak orchard signal: fall back to cache instead of hanging */
+/* ONE cache entry for the page. "/droneusage/", "/droneusage/index.html"
+   and "/droneusage/?source=share" are the same app; keeping a copy per URL
+   let an online visit refresh one copy while the installed app (start_url
+   ./index.html) launched another, older one offline. */
+const PAGE_KEY = "./index.html";
 const ASSETS = [
-  "./",
-  "./index.html",
+  PAGE_KEY,
   "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png",
@@ -40,12 +44,15 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   /* Remove only this app's old caches (including the old numbered
      dronedose-vNN ones): other GitHub Pages projects on the same hostname
-     share Cache Storage. */
+     share Cache Storage. Also drop the "./" page entry older workers kept:
+     the page now lives under PAGE_KEY only, and a second copy went stale. */
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(keys
         .filter(k => k.indexOf(CACHE_PREFIX) === 0 && k !== CACHE)
         .map(k => caches.delete(k))))
+      .then(() => caches.open(CACHE))
+      .then(c => c.delete("./"))
       .then(() => self.clients.claim())
   );
 });
@@ -64,34 +71,41 @@ function tellPage(clientId) {
   });
 }
 
+function isHtml(res) {
+  return (res.headers.get("content-type") || "").indexOf("text/html") !== -1;
+}
+
 self.addEventListener("fetch", event => {
   const req = event.request;
   if (req.method !== "GET") return;
   if (new URL(req.url).origin !== self.location.origin) return;
 
   const isPage = req.mode === "navigate";
-  let servedFromCache = false;
+  /* Clone of the cached page actually handed to the user, if any. A newer
+     build is announced by comparing against THIS, not against whatever
+     the cache holds under the request URL. */
+  let servedCopy = null;
 
-  const fromCache = () =>
-    caches.match(req).then(hit =>
-      hit || (isPage ? caches.match("./index.html") : undefined)
-    );
+  const fromCache = () => isPage
+    ? caches.match(PAGE_KEY).then(hit => hit || caches.match(req))
+    : caches.match(req);
 
   const fromNetwork = fetch(new Request(req, { cache: "no-cache" })).then(res => {
     if (!usable(res)) throw new Error("bad response " + (res && res.status));
     const copy = res.clone();
+    /* Every HTML navigation, whatever its URL or query, refreshes the one
+       page entry. A non-HTML navigation (an icon opened directly) is
+       stored under its own URL and must not overwrite the page. */
+    const page = isPage && isHtml(res);
     const store = caches.open(CACHE).then(c => {
-      if (!isPage) return c.put(req, copy);
-      /* For the page, compare with what was cached before overwriting, so
-         a page answered from the cache can be told a newer build arrived. */
-      return c.match(req).then(old => Promise.all([
-        old ? old.text() : null,
-        copy.clone().text()
-      ])).then(([oldText, newText]) => c.put(req, copy).then(() => {
-        if (servedFromCache && oldText !== null && oldText !== newText) {
-          return tellPage(event.resultingClientId || event.clientId);
-        }
-      }));
+      if (!page) return c.put(req, copy);
+      const newText = copy.clone().text();
+      return c.put(PAGE_KEY, copy).then(() => {
+        if (!servedCopy) return;
+        return Promise.all([servedCopy.text(), newText]).then(([oldText, text]) => {
+          if (oldText !== text) return tellPage(event.resultingClientId || event.clientId);
+        });
+      });
     }).catch(() => {});
     return { res, store };
   });
@@ -99,7 +113,10 @@ self.addEventListener("fetch", event => {
   const work = new Promise((resolve, reject) => {
     let settled = false;
     const finish = (res, cached) => {
-      if (!settled) { settled = true; servedFromCache = cached; resolve(res); }
+      if (settled) return;
+      settled = true;
+      if (cached && isPage) servedCopy = res.clone();
+      resolve(res);
     };
 
     const timer = setTimeout(() => {

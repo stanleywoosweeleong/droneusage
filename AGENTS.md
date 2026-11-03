@@ -24,11 +24,13 @@ breaks the deployment workflow it was designed around.
 | `icon-*.png` | App icons |
 | `make_icons.py` | Regenerates the icons (Pillow) |
 | `test/dose.test.js` | Dosage math regression test |
+| `test/sw.test.js` | Service worker regression test (mocked worker APIs) |
 
 ## Before you commit
 
 ```
 node test/dose.test.js
+node test/sw.test.js
 ```
 
 No dependencies. It extracts the calculation core from `index.html` and runs
@@ -48,7 +50,9 @@ comes from `APP_FINGERPRINT`, a hash of the inline script and CSS computed
 at runtime. Edit `sw.js` only to change the worker's behaviour; if you add
 a file the app needs offline, add it to `ASSETS` there. Do not reintroduce
 a hand-bumped version, and do not rename the cache: activation deletes every
-other `dronedose-` cache.
+other `dronedose-` cache. The page is cached under one key (`PAGE_KEY`,
+`./index.html`) whatever URL it was opened by; do not go back to one copy
+per URL, or the installed app launches a stale build offline.
 
 ## Correctness rules — these are the point of the app
 
